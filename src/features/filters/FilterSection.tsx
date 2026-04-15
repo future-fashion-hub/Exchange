@@ -1,15 +1,10 @@
-// src\features\filters\FilterSection.tsx
-
 import React, { useState } from "react";
-import styles from "./FilterSection.module.css";
-import { Icon } from "../../shared/ui/icon/Icon";
 import { RootState, useSelector } from "@store";
 import { GENDERS, TGender } from "@api/types";
 
 interface FilterSectionProps {
   onGenderChange: (value: TGender) => void;
   onPlacesChange: (selectedPlaces: string[]) => void;
-
   selectedGender: TGender;
   selectedPlaces: string[];
 }
@@ -26,7 +21,6 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   const mainPlaces = places.slice(0, 5);
   const otherPlaces = places.slice(5);
 
-  // добавляем/убираем из списка мест
   const handlePlaceToggle = (placeName: string) => {
     const newPlaces = selectedPlaces.includes(placeName)
       ? selectedPlaces.filter((n) => n !== placeName)
@@ -37,102 +31,79 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   const genderGroupId = React.useId();
 
   return (
-    <div className={styles.filter}>
-      {/* Фильтр по полу */}
-      <div className={styles.group}>
-        <h3 className={styles.title}>Пол автора</h3>
-        <div className={styles.items}>
-          <label className={styles.item}>
-            <input
-              type="radio"
-              name={`gender-${genderGroupId}`}
-              value={GENDERS.UNSPECIFIED}
-              checked={selectedGender === GENDERS.UNSPECIFIED}
-              onChange={(e) => onGenderChange(e.target.value as TGender)}
-              className={styles.input}
-            />
-            <span className={styles.radio}></span>
-            <span className={styles.text}>Не имеет значения</span>
-          </label>
-          <label className={styles.item}>
-            <input
-              type="radio"
-              name={`gender-${genderGroupId}`}
-              value={GENDERS.MALE}
-              checked={selectedGender === GENDERS.MALE}
-              onChange={(e) => onGenderChange(e.target.value as TGender)}
-              className={styles.input}
-            />
-            <span className={styles.radio}></span>
-            <span className={styles.text}>Мужской</span>
-          </label>
-          <label className={styles.item}>
-            <input
-              type="radio"
-              name={`gender-${genderGroupId}`}
-              value={GENDERS.FEMALE}
-              checked={selectedGender === GENDERS.FEMALE}
-              onChange={(e) => onGenderChange(e.target.value as TGender)}
-              className={styles.input}
-            />
-            <span className={styles.radio}></span>
-            <span className={styles.text}>Женский</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Фильтр по городу */}
-      <div className={styles.group}>
-        <h3 className={styles.title}>Город</h3>
-
-        {/* Основные города */}
-        <div className={styles.items}>
-          {mainPlaces.map((place) => (
-            <label key={place.id} className={styles.item}>
-              <input
-                type="checkbox"
-                checked={selectedPlaces.includes(place.name)}
-                onChange={() => handlePlaceToggle(place.name)}
-                className={styles.input}
-              />
-              <span className={styles.checkbox}></span>
-              <span className={styles.text}>{place.name}</span>
-            </label>
-          ))}
-
-          {/* Переключатель с выпадающим списком */}
-          <div
-            className={styles.toggle}
-            onClick={() => setShowAllPlaces(!showAllPlaces)}
-          >
-            <span className={styles.text}>Все города</span>
-            <Icon
-              name={showAllPlaces ? "chevronUp" : "chevronDown"}
-              size="s"
-              className={styles.icon}
-            />
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 w-full mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Фильтр по полу */}
+        <div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">Пол автора</h3>
+          <div className="space-y-3">
+            {[
+              { value: GENDERS.UNSPECIFIED, label: "Не имеет значения" },
+              { value: GENDERS.MALE, label: "Мужской" },
+              { value: GENDERS.FEMALE, label: "Женский" }
+            ].map(gender => (
+              <label key={gender.value} className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  name={`gender-${genderGroupId}`}
+                  value={gender.value}
+                  checked={selectedGender === gender.value}
+                  onChange={(e) => onGenderChange(e.target.value as TGender)}
+                  className="w-5 h-5 text-primary border-gray-300 focus:ring-primary dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+                />
+                <span className="text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors">
+                  {gender.label}
+                </span>
+              </label>
+            ))}
           </div>
         </div>
 
-        {/* Выпадающий список со всеми остальными городами */}
-        {showAllPlaces && otherPlaces.length > 0 && (
-          <div className={styles.dropdown}>
-            <div className={styles.items}>
+        {/* Фильтр по городу */}
+        <div>
+          <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">Город</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {mainPlaces.map((place) => (
+              <label key={place.id} className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={selectedPlaces.includes(place.name)}
+                  onChange={() => handlePlaceToggle(place.name)}
+                  className="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer transition-all"
+                />
+                <span className="text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors text-sm">
+                  {place.name}
+                </span>
+              </label>
+            ))}
+          </div>
+
+          <button
+            className="mt-4 flex items-center text-primary font-semibold hover:text-secondary transition-colors text-sm"
+            onClick={() => setShowAllPlaces(!showAllPlaces)}
+          >
+            <span>{showAllPlaces ? "Скрыть города" : "Все города"}</span>
+            <svg className={`w-4 h-4 ml-1 transform transition-transform ${showAllPlaces ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+
+          {showAllPlaces && otherPlaces.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in-down">
               {otherPlaces.map((place) => (
-                <label key={place.id} className={styles.item}>
+                <label key={place.id} className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={selectedPlaces.includes(place.name)}
                     onChange={() => handlePlaceToggle(place.name)}
-                    className={styles.input}
+                    className="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer transition-all"
                   />
-                  <span className={styles.checkbox}></span>
-                  <span className={styles.text}>{place.name}</span>
+                  <span className="text-gray-700 dark:text-gray-300 group-hover:text-primary transition-colors text-sm">
+                    {place.name}
+                  </span>
                 </label>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
