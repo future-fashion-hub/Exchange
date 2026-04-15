@@ -25,6 +25,9 @@ import { RegistrationStep1 } from "../pages/registration/RegistrationStep1";
 import { RegistrationStep2 } from "../pages/registration/RegistrationStep2";
 import { RegistrationStep3 } from "../pages/registration/RegistrationStep3";
 
+import { ChatPage } from "../pages/chat/ChatPage";
+import { AdminDashboard } from "../pages/admin/AdminDashboard";
+
 //Данные/типы/стор (для каталога)
 import { RootState, useDispatch } from "@store";
 import { useSelector } from "@store";
@@ -142,6 +145,7 @@ export const App: React.FC = () => {
           {/* ПРОФИЛЬ */}
           <Route path="profile">
             <Route index element={<ProfilePage />} />
+            <Route path="chat" element={<ChatPage />} />
             {/* Все подразделы профиля ведут на 404 */}
             <Route path="notifications" element={<NotFoundPage />} />
             <Route path="requests" element={<NotFoundPage />} />
@@ -149,6 +153,8 @@ export const App: React.FC = () => {
             <Route path="favorites" element={<NotFoundPage />} />
             <Route path="skills" element={<NotFoundPage />} />
           </Route>
+
+          <Route path="admin" element={<AdminDashboard />} />
 
           {/* Системные */}
           <Route path="500" element={<ServerErrorPage />} />
