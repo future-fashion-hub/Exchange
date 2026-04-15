@@ -1,9 +1,6 @@
-// src\pages\Offer\OfferPage.tsx
-
 import { RootState, useDispatch } from '@store';
 import { useSelector } from 'react-redux';
 import { UserCard } from '../../features/users/userCard/UserCard';
-import { Icon } from '../../shared/ui/icon/Icon';
 import { CardShowcase } from '../../widgets/cardShowcase/CardShowcase';
 import { CardSlider } from '@widgets';
 import { SkillCardDetails } from '../../features/skills/skillCardDetails/skillCardDetails';
@@ -14,10 +11,7 @@ import { addOfferThunk } from '../../services/offers/actions';
 import { RegistrationModal } from '../../features/registration/RegistrationModal';
 import { useState } from 'react';
 
-import styles from './OfferPage.module.css';
-
 export const OfferPage: React.FC = () => {
-  
   const dispatch = useDispatch();
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
@@ -25,27 +19,19 @@ export const OfferPage: React.FC = () => {
   const offerUser = useSelector(getOfferUser);
   const {users} = useSelector((state: RootState) => state.users);
 
-   const handleExchange = () => {
-    if (!offerUser) {
-      console.error("Offer user is not available");
-      return;
-    }
-
+  const handleExchange = () => {
+    if (!offerUser) return;
     if (currentUser?.subCategoryId) {
-      // Пользователь авторизован - предлагаем обмен
       dispatch(addOfferThunk({
         offerUserId: offerUser.id,
         skillOwnerId: currentUser.subCategoryId
       }));
     } else {
-      // Пользователь не авторизован - показываем модалку регистрации
       setIsRegistrationModalOpen(true);
     }
   };
 
   const handleRegistrationComplete = () => {
-    console.log("Регистрация завершена, можно предлагать обмен");
-    // После регистрации можно сразу предложить обмен
     if (offerUser && currentUser?.subCategoryId) {
       dispatch(addOfferThunk({
         offerUserId: offerUser.id,
@@ -55,55 +41,100 @@ export const OfferPage: React.FC = () => {
   };
 
   if (!offerUser) {
-    return <Loader />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <Loader />
+      </div>
+    );
   }
 
   return (
-    <>
-      <section className={styles.skillSection}>
-        <div className={styles.userCard}>
-          {offerUser && (
-            <UserCard
-              needAbout
-              user={offerUser}
-            />
-          )}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-7xl mx-auto space-y-12">
+        
+        {/* Breadcrumbs or Back button can go here */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span className="cursor-pointer hover:text-primary transition-colors">Главная</span>
+          <span>/</span>
+          <span className="cursor-pointer hover:text-primary transition-colors">Навыки</span>
+          <span>/</span>
+          <span className="font-semibold text-gray-900 dark:text-white">Оффер #{offerUser.id}</span>
         </div>
-        {offerUser && (
-          <SkillCardDetails
-              title={offerUser.skill || "Навык не указан"}
-              subtitle={`${offerUser.cat_text || ""} / ${offerUser.sub_text || ""}`}
-              description={offerUser.description || "Описание отсутствует"}
-              images={offerUser.images || ""}
-              buttonText={"Предложить обмен"}
-              onExchange={handleExchange}
-          />)
-        }
-      </section>
 
-      {!users && (
-        <Loader />
-      )}
+        {/* Main Content Layout */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* User Card Sidebar */}
+          <div className="lg:col-span-4 sticky top-6">
+            <UserCard needAbout user={offerUser} />
+          </div>
 
-{/* 
-      похожие предложения должны браться из API
-      к примеру у тебя 10000 пользователей. а загружено в users 100
-      твой поиск будет только среди 100
- */}
-     <section>
-        <CardShowcase
-          title="Похожие предложения"
-          titleSize='1.5em'
-          icon={<Icon name="chevronRight" />}>
-            <CardSlider users={users}/>
-        </CardShowcase>
-      </section>
+          {/* Skill Details Main Area */}
+          <div className="lg:col-span-8 bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+            {/* Header Badge */}
+            <div className="flex items-center gap-3 mb-6">
+              <span className="px-4 py-1.5 bg-blue-50 text-primary dark:bg-blue-900/30 dark:text-blue-300 font-bold rounded-full text-sm">
+                Открыт к обмену
+              </span>
+              <span className="px-4 py-1.5 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 font-bold rounded-full text-sm">
+                {offerUser.cat_text || "Категория"} / {offerUser.sub_text || "Подкатегория"}
+              </span>
+            </div>
 
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
+              {offerUser.skill || "Навык не указан"}
+            </h1>
+
+            {/* Main Image placeholder if it exists */}
+            {offerUser.images && (
+              <div className="w-full h-64 sm:h-96 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-8 overflow-hidden">
+                <img src={offerUser.images[0] || ""} alt="Skill" className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            {/* Description */}
+            <div className="prose dark:prose-invert max-w-none mb-10">
+              <h3 className="text-xl font-bold mb-4">Описание навыка</h3>
+              <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {offerUser.description || "Пользователь пока не добавил подробное описание своего навыка. Но вы всегда можете отправить запрос и обсудить детали в чате!"}
+              </p>
+            </div>
+
+            {/* Action Area */}
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 border border-gray-100 dark:border-gray-600 flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-1">Заинтересовал навык?</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Отправьте запрос на обмен опытом. Это бесплатно.</p>
+              </div>
+              <button 
+                onClick={handleExchange}
+                className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                Предложить обмен
+              </button>
+            </div>
+            
+          </div>
+        </section>
+
+        {/* Similar Offers Placeholder */}
+        {!users ? (
+          <Loader />
+        ) : (
+          <section className="pt-12 border-t border-gray-200 dark:border-gray-800">
+            <h2 className="text-2xl font-bold mb-8 dark:text-white">Похожие предложения</h2>
+            <CardSlider users={users} />
+          </section>
+        )}
+
+      </div>
+      
       <RegistrationModal
         isOpen={isRegistrationModalOpen}
         onClose={() => setIsRegistrationModalOpen(false)}
         onRegistrationComplete={handleRegistrationComplete}
       />
-    </>
-  )
+    </div>
+  );
 };
