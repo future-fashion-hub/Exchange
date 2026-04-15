@@ -1,0 +1,112 @@
+.react-datepicker__popper {
+  padding-bottom: 0 !important;
+}
+
+.react-datepicker {
+  font-family: "Roboto", sans-serif;
+  border: 1px solid #000;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  width: 280px !important;
+  height: 360px !important;
+}
+
+.react-datepicker__month-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.react-datepicker__header {
+  background-color: white;
+  border-bottom: none;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.react-datepicker__current-month {
+  display: none;
+}
+
+.react-datepicker__day-names {
+  display: flex;
+  justify-content: space-around;
+  margin: 8px 0;
+}
+
+.react-datepicker__day-name {
+  color: #508826;
+  font-weight: 500;
+  font-size: 12px;
+  width: 32px;
+  margin: 2px;
+  text-transform: capitalize;
+}
+
+.react-datepicker__month {
+  margin: 8px;
+}
+
+.react-datepicker__week {
+  display: flex;
+  justify-content: space-around;
+}
+
+.react-datepicker__day {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  margin: 2px;
+  border-radius: 50%;
+  color: #253017;
+  font-size: 14px;
+}
+
+/* Дни предыдущего и следующего месяца (включая выходные) */
+.react-datepicker__day--outside-month,
+.react-datepicker__day--outside-month.react-datepicker__day--weekend {
+  color: #9ca197 !important;
+  visibility: visible;
+}
+
+/* Выходные дни текущего месяца */
+.react-datepicker__day--weekend:not(.react-datepicker__day--outside-month) {
+  color: #253017 !important; /* темный цвет для выходных текущего месяца */
+}
+.react-datepicker__day:hover {
+  background-color: #e4e8df;
+  border-radius: 50%;
+}
+
+.react-datepicker__day--selected {
+  background-color: #abd27a;
+  color: #253017 !important;
+  border-radius: 50%;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #abd27a;
+  color: #253017 !important;
+  border-radius: 50%;
+}
+
+.react-datepicker__day--today {
+  font-weight: 500;
+}
+
+.react-datepicker__navigation {
+  display: none;
+}
+
+.react-datepicker__day--weekend {
+  color: #253017 !important;
+}
+
+.react-datepicker__day-name:first-letter {
+  text-transform: uppercase;
+}

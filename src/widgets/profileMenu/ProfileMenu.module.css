@@ -1,0 +1,56 @@
+.menu {
+  width: 100%;
+  max-width: 324px;
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+}
+
+.menuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menuItem {
+  margin-bottom: 8px;
+}
+
+.menuButton {
+  width: 100%;
+  padding: 12px 0 12px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #253017;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menuButton:hover {
+  background-color: #e4e8df;
+}
+
+.menuButton.active {
+  background-color: #deebc5;
+}
+
+.menuItemContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuIcon {
+  flex-shrink: 0;
+  color: #253017;
+}
+
+.menuLabel {
+  font-size: 16px;
+  font-weight: 400;
+}

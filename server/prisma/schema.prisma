@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  GUEST
+  USER
+  ADMIN
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum SkillType {
+  TEACH
+  LEARN
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(USER)
+  fullName      String
+  bio           String?
+  rating        Float     @default(0.0)
+  location      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  skills        Skill[]
+  offersSent    OfferExchange[] @relation("Sender")
+  offersReceived OfferExchange[] @relation("Receiver")
+  messagesSent  Message[]       @relation("MessageSender")
+  messagesReceived Message[]    @relation("MessageReceiver")
+}
+
+model Category {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  skills  Skill[]
+}
+
+model Skill {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  type        SkillType
+  userId      String
+  categoryId  String
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id])
+}
+
+model OfferExchange {
+  id          String       @id @default(uuid())
+  senderId    String
+  receiverId  String
+  status      OfferStatus  @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  sender      User         @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User         @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  senderId    String
+  receiverId  String
+  text        String
+  createdAt   DateTime  @default(now())
+
+  sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+}

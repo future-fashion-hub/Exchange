@@ -1,0 +1,61 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 32px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.avatarContainer {
+    margin-bottom: 16px;
+}
+
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    padding: 6px;
+    border: 1px solid #E4E8DF;
+}
+
+.info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.name {
+    font-size: 24px;
+    font-weight: 500;
+    color: #253017;
+}
+
+.role {
+    font-size: 16px;
+    color: #69735D;
+    margin-top: 5px;
+}
+
+.buttonContainer {
+    width: 100%;
+    margin-top: 16px;
+}
+
+.gitHubButton {
+    margin-bottom: 0;
+    max-width: none;
+}

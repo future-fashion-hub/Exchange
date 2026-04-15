@@ -1,0 +1,48 @@
+.modalContent {
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+.iconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #f0f7e6;
+  margin: 0 auto 16px;
+}
+
+.icon {
+  background-color: white;
+}
+
+.textContent {
+  text-align: center;
+}
+
+.title {
+  font-family: "Jost", sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #253017;
+  margin: 0 0 12px 0;
+}
+
+.messageText {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  color: #253017;
+  line-height: 1.5;
+  display: block;
+  margin-bottom: 24px;
+}

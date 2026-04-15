@@ -1,0 +1,68 @@
+.modalContent {
+  padding: 40px;
+  text-align: center;
+  max-width: 556px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  align-items: center;
+}
+
+.iconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #f0f7e6;
+  margin: 0 auto 16px;
+}
+
+.icon {
+  color: #000;
+  background-color: white;
+}
+
+.textContent {
+  text-align: center;
+}
+
+.title {
+  font-family: "Jost", sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #253017;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.message {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #253017;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.cancelButton {
+  flex: 1;
+  border: 1px solid #abd27a;
+  background: white;
+  color: #253017;
+}
+
+.loginButton {
+  flex: 1;
+}

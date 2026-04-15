@@ -1,0 +1,26 @@
+.container {
+  position: absolute;
+  left: 1056px;
+  width: 260px;
+  padding: 40px;
+  border: 1px solid #69735D;
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  gap: 24px;
+}
+
+.content li {
+  cursor: pointer;
+  list-style: none;
+}
+
+.logoutContainer {
+  display: flex;
+  gap: 8px;
+}

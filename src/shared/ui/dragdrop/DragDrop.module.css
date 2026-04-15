@@ -1,0 +1,40 @@
+.imageWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.wrapper.error {
+  border: 2px solid #BF3920 !important;
+  border-radius: 8px;
+}
+
+.image {
+  fill: #508826;
+}
+
+.imageText {
+  color: #508826;
+}
+
+.input {
+  margin: 0;
+  padding: 0;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+.label {
+  display: grid;
+  max-height: 96px;
+  opacity: 0.8;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px dashed #69735D; 
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}

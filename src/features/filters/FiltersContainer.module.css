@@ -1,0 +1,44 @@
+.filtersContainer {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-width: 324px;
+  width: 100%;
+  height: fit-content;
+}
+
+.filtersTitle {
+  font-family: 'Jost';
+  font-size: 24px;
+  font-weight: 500;
+  color: #253017;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+ }
+
+.filtersContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.resetButton {
+  display: flex;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: #508826; 
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.resetButton:hover { opacity: .85; }

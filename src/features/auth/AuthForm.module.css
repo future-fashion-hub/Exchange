@@ -1,0 +1,65 @@
+.authForm {
+  max-width: 556px;
+  height: 692px;
+  padding: 123px 60px;
+  background: #ffffff;
+  border-radius: 12px;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.content {
+  width: 100%;
+  max-width: 436px;
+}
+
+.button {
+  width: 100%;
+  max-width: 436px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #69735d;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.googleButton:hover {
+  background: #f8f9fa;
+}
+
+.appleButton:hover {
+  background: #f8f9fa;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e4e8df;
+}
+
+.separator span {
+  padding: 0 16px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 32px;
+}

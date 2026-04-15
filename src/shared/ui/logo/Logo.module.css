@@ -1,0 +1,12 @@
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 159px;
+  height: 40px;
+}
+
+.logo h1 {
+  font-family: 'Jost';
+  font-size: 24px;
+}

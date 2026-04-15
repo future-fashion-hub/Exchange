@@ -1,0 +1,150 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+}
+
+.label {
+  font-size: 16px;
+  color: #253017;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+.inputContainer {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+}
+
+.calendarIconWrapper {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none; 
+  z-index: 2;
+  cursor: pointer; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendarIcon {
+  width: 20px;
+  height: 20px;
+  pointer-events: all;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  border: 1px solid #69735d;
+  border-radius: 12px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  background: white;
+  height: 48px;
+  cursor: pointer;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #253017;
+}
+
+.input.error {
+  border-color: #bf3920;
+}
+
+.calendarIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.errorText {
+  color: #bf3920;
+  font-size: 12px;
+}
+
+.customHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  background: white;
+}
+
+.selectors {
+  display: flex;
+  gap: 8px;
+}
+
+.monthSelector,
+.yearSelector {
+  padding: 8px 12px;
+  background: white;
+  color: #253017;
+  cursor: pointer;
+  font-size: 16px;
+  border: none;
+  outline: none;
+}
+
+.popper {
+  padding-bottom: 0 !important;
+  transform: translate3d(0px, 80px, 0px) !important; /* позиционирование под инпутом */
+  z-index: 1000;
+}
+
+.calendarContainer {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #69735d;
+  width: 280px; 
+  height: 360px; 
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarContent {
+  padding: 16px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.footerButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 16px;
+  background: white;
+  border-radius: 0 0 12px 12px;
+}
+
+.cancelButton {
+  border: 1px solid #ABD27A;
+}
+
+.cancelButton:hover {
+  border: 1px solid transparent !important;
+}
+
+/* Скрываем крестик очистки */
+.react-datepicker__close-icon {
+  display: none !important;
+}
+
+.react-datepicker__close-icon::after {
+  display: none !important;
+}

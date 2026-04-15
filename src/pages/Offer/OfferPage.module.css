@@ -1,0 +1,15 @@
+.skillSection {
+  display: flex;
+  width: 100%;
+  gap: 1.5em;
+  max-height: 444px;
+  margin-bottom: 3.75em;
+}
+
+.userCard {
+  flex-shrink: 0;
+}
+
+.userOffer {
+  flex-grow: 1;
+}

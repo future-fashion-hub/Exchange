@@ -1,0 +1,134 @@
+.personalData {
+  width: 100%;
+  max-width: 1020px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 244px;
+  gap: 196px;
+  align-items: start;
+  min-width: 0;
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.avatarContainer {
+  position: relative;
+  width: 224px;
+  height: 224px;
+   flex-shrink: 0;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarIcon {
+  color: #ccc;
+}
+
+.avatarEditButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 56px;
+  height: 56px;
+  background: #deebc5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+   min-width: 0;
+   max-width: 460px;
+}
+
+.emailPasswordGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.passwordSection {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.passwordButton {
+  background: none;
+  border: none;
+  color: #508826;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.rowItem {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.aboutSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.aboutLabel {
+  font-size: 16px;
+  color: #253017;
+  font-weight: 400;
+}
+
+.aboutTextarea {
+  width: 100%;
+  padding: 12px 20px 12px 12px;
+  border: 1px solid #69735d;
+  border-radius: 12px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  resize: none;
+  min-height: 96px;
+}
+
+.aboutTextarea:focus {
+  outline: none;
+}
+
+.saveButton {
+  margin-top: 16px;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}

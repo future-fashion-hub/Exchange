@@ -1,0 +1,116 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.25em;
+  width: 20.25em;
+  max-height: 23em;
+  padding: 1.25em;
+  background-color: #FFFFFF;
+  border-radius: 0.75rem;
+  /* gap: 20px; */
+  /* width: 324px; */
+  /* max-height: 444px; */
+  /* padding: 20px; */
+}
+
+.cardAbout {
+  padding: 32px;
+  max-height: 27.75em;
+}
+
+.userInfo {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.userInfoContainer {
+  display: flex;
+  gap: 0.75em;
+  /* gap: 12px; */
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  object-fit: cover; 
+  border-radius: 50%;
+}
+
+.infoWrapper {
+  align-self: center;
+}
+
+.userName {
+  margin-bottom: 0.25em;
+  font-family: 'Open sans';
+  font-size: 1.25em;
+  line-height: 1.5em;
+  font-weight: 600;
+  /* font-size: 20px; */
+  /* line-height: 24px; */
+}
+
+.fromAge {
+  color: #253017;
+  font-size: 0.75em;
+  line-height: 1em;
+  /* font-size: 12px; */
+  /* line-height: 16px; */
+}
+
+.about {
+  display: -webkit-box;
+  max-height: 4.5em;
+  margin-bottom: 0.25em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  /* max-height: 72px; */
+}
+
+.like {
+  width: 1.5em;
+  height: 1.5em;
+  align-self: flex-start;
+  /* width: 24px;
+  height: 24px; */
+}
+
+.canTeach {
+  margin-bottom: 0.75em;
+  /* margin-bottom: 12px; */
+}
+
+.canTeachAbout {
+  margin-bottom: 1.5em;
+  /* margin-bottom: 12px; */
+}
+
+.offer {
+  line-height: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 500;
+  letter-spacing: 2%;
+  /* line-height: 24px;
+  margin-bottom: 8px; */
+}
+
+.offerAbout {
+  margin-bottom: 0.875em;
+}
+
+.tagWrapper {
+  display: flex;
+  gap: 0.25em;
+  box-sizing: border-box;
+  line-height: 1em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  /* align-items: center; */
+  /* gap: 4px; */
+}

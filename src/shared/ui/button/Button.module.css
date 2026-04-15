@@ -1,0 +1,39 @@
+.button {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #DEEBC5;
+}
+
+.colored {
+  background-color: #ABD27A;
+}
+
+.button:disabled {
+  background-color: #E4E8DF !important;
+  color: #69735D !important;
+  cursor: not-allowed !important;
+}
+
+.button:disabled:hover {
+  background-color: #E4E8DF !important; /* Тот же цвет, что и без ховера */
+  color: #69735D !important;
+}
+
+.colored:disabled {
+  background-color: #E4E8DF !important;
+  color: #69735D !important;
+  cursor: not-allowed !important;
+}
+
+.colored:disabled:hover {
+  background-color: #E4E8DF !important;
+  color: #69735D !important;
+}

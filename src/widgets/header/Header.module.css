@@ -1,0 +1,109 @@
+.header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-height: 104px;
+  box-sizing: border-box;
+  margin-bottom: 32px;
+  padding: 42px 36px 26px;
+  z-index: 2;
+}
+
+.navList {
+  display: flex;
+  width: 100%;
+  column-gap: 1.5em;
+}
+
+.li {
+  list-style-type: none;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.link {
+  color: #253017;
+  background-color: transparent;
+  letter-spacing: 0.0224em;
+}
+
+.dropButton {
+  display: flex;
+  align-items: center;
+}
+
+li:has(img) {
+  display: flex;
+  column-gap: 4px;
+}
+
+.iconChevron {
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  align-self: center;
+  cursor: pointer;
+}
+
+/* Правая секция с иконками и кнопками */
+.rightSection {
+  display: flex;
+  align-items: center;
+}
+
+.iconWrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Общие стили для кнопок */
+.moonButton,
+.notificationButton,
+.likeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Отступы между иконками в правой секции */
+.rightSection > *:not(:last-child) {
+  margin-right: 20px;
+}
+
+/* Стили для блока кнопок */
+.buttonsWrapper {
+  display: flex;
+  gap: 8px;
+}
+
+/* Стили для блока пользователя */
+.userAuthWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: fit-content; /* Добавляем минимальную ширину */
+  flex-shrink: 0; /* Запрещаем сжатие */
+}
+
+.userName {
+  font-weight: 400;
+  font-size: 16px;
+  color: #253017;
+  white-space: nowrap;
+}
+
+.userAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}

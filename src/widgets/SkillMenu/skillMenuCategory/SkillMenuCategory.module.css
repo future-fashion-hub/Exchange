@@ -1,0 +1,48 @@
+.skillMenu {
+  display: grid;
+  grid-template-columns: repeat(2, 488px);
+  gap: 40px;
+  margin: 0;
+  width: 100%;
+}
+
+.category {
+  display: flex;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+/* Контейнер для иконки с круглым фоном */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.li {
+  font-size: 16px;
+  list-style-type: none;
+  cursor: pointer;
+}
+
+.category_title {
+  font-family: 'Jost';
+  font-size: 24px;
+  font-weight: 500;
+}

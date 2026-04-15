@@ -1,0 +1,9 @@
+.popup_container {
+  position: absolute;
+  top: 100%;
+  z-index: 4;
+}
+  
+.content {
+  margin: 0;
+}

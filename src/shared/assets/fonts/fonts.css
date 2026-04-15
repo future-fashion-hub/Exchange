@@ -1,0 +1,19 @@
+@font-face {
+  font-weight: 500;
+  font-family: 'Jost';
+  src: url('./font-files/Jost/Jost-VariableFont_wght.ttf') format('truetype');
+}
+
+@font-face {
+  font-weight: 600;
+  font-family: 'Open sans';
+  src: url('./font-files/Open_Sans/OpenSans-VariableFont_wght.ttf')
+    format('truetype');
+}
+
+@font-face {
+  font-weight: 400, 500;
+  font-family: 'Roboto';
+  src: url('./font-files/Roboto/Roboto-VariableFont_wght.ttf')
+    format('truetype');
+}

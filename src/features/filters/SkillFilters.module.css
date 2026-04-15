@@ -1,0 +1,145 @@
+.skillFilters {
+  margin-bottom: 0;
+  max-width: 324px;
+  width: 100%;
+  height: fit-content;
+}
+
+.group {
+  margin-bottom: 32px;
+}
+
+.group:last-child {
+  margin-bottom: 0;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #253017;
+  margin-bottom: 16px;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: all 0.2s ease;
+}
+
+.item:hover {
+  background-color: #f8f9f7;
+}
+
+.input {
+  display: none;
+}
+
+.radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #69735d;
+  border-radius: 50%;
+  margin-right: 12px;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.input:checked + .radio {
+  border-color: #508826;
+  background: #fff;
+}
+
+.input:checked + .radio::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #508826;
+  border-radius: 50%;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #69735d;
+  border-radius: 4px;
+  margin-right: 12px;
+  position: relative;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.input:checked + .checkbox {
+  border-color: #508826;
+  background: #508826;
+}
+
+.input:checked + .checkbox::after {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.text {
+  font-size: 16px;
+  color: #253017;
+  line-height: 1.4;
+}
+
+.categoryItem {
+  margin-bottom: 8px;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expandButton:hover {
+  background: #f5f5f5;
+}
+
+.subcategories {
+  margin-left: 24px;
+  margin-top: 8px;
+  border-left: 2px solid #e4e8df;
+  padding-left: 12px;
+}
+
+.subcategoryItem {
+  padding: 4px 0;
+}
+
+.subcategoryItem .text {
+  font-size: 16px;
+  color: #000;
+}

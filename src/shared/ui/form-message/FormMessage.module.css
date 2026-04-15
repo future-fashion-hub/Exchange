@@ -1,0 +1,16 @@
+.message {
+  font-size: 12px;
+  display: block;
+}
+
+.error {
+  color: #bf3920;
+}
+
+.success {
+  color: #253017;
+}
+
+.hint {
+  color: #253017
+}

@@ -1,0 +1,141 @@
+.widget {
+  position: absolute;
+  left: 776px;
+  width: 556px;
+  background: white;
+  border: 1px solid #69735d;
+  border-radius: 12px;
+  z-index: 1000;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 60px;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  margin: 0;
+  font-family: "Jost", sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #253017;
+  grid-column: 1;
+}
+
+.markAllButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  grid-column: 2;
+}
+
+.markAllText {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #508826;
+}
+
+.markAllButton:hover .markAllText {
+  text-decoration: none;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  grid-column: 2;
+}
+
+.clearText {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #508826;
+}
+
+.clearButton:hover .clearText {
+  text-decoration: none;
+}
+
+.notificationsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+.viewedSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.notificationCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: 16px;
+  column-gap: 8px;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: flex-start;
+}
+
+.contentSection {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  width: 100%;
+}
+
+.textSection {
+  grid-column: 1;
+}
+
+.timeSection {
+  grid-column: 2;
+  display: flex;
+  align-items: flex-start;
+}
+
+.notificationHeader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  color: #253017;
+}
+
+.time {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  color: #69735d;
+  white-space: nowrap;
+}
+
+.details {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  color: #253017;
+  line-height: 16px;
+}
+
+.buttonContainer {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-start;
+}

@@ -1,0 +1,44 @@
+.wrapper {
+  max-width: 556px;
+  padding: 50px 60px;
+  background: #ffffff;
+  border-radius: 12px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* занимает всё доступное место */
+  gap: 32px;
+}
+
+.inputGroup {
+  display: grid;
+  gap: 16px;
+  border: none;
+  flex: 1; /* занимает оставшееся место */
+  overflow-y: auto; /* скролл при переполнении */
+}
+
+.customTextarea {
+  height: 96px !important;
+  min-height: 96px !important;
+  resize: vertical;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 20px;
+  flex-shrink: 0; /* кнопки не уходят вниз */
+}
+
+.backButton {
+  border: 1px solid #abd27a !important;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 14px;
+}

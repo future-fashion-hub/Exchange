@@ -1,0 +1,17 @@
+.homePageWrapper {
+  width: 100%;
+  max-width: 1440px;
+}
+
+.filterSectionWrapper{
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.showCaseWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}

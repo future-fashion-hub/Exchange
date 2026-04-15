@@ -1,0 +1,38 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 68px;
+}
+
+.error_block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 460px;
+  gap: 35px;
+}
+
+.item_block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 32px;
+}
+
+.button_block {
+  display: flex;
+  gap: 24px;
+}
+
+.text {
+  text-align: center;
+}
+
+h2 {
+  font-family: 'Jost';
+}
+
+.button {
+  border: 1px solid #ABD27A;
+}

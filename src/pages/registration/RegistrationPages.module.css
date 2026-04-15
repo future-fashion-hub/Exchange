@@ -1,0 +1,72 @@
+.registrationPage {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  overflow-y: auto;
+  padding-bottom: 40px;
+  border-radius: 12px;
+}
+
+.registrationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 36px 0 36px;
+  background: #f8f9fa;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #253017;
+}
+
+.closeButton {
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.progressSection {
+  background: #f8f9fa;
+  padding: 20px;
+}
+
+.mainContent {
+  padding-top: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.contentContainer {
+  display: flex;
+  gap: 24px;
+  max-width: 1136px;
+  width: 100%;
+  justify-content: center;
+  margin: 0 auto;
+
+}
+
+.formSection {
+  flex: 0 0 auto;
+  width: 556px;
+}
+
+.onboardingSection {
+  flex: 0 0 auto;
+  width: 556px;
+}

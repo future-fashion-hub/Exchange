@@ -1,0 +1,26 @@
+@import url('./shared/assets/fonts/fonts.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0; 
+}
+
+body {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: 'Roboto', 'Jost', 'Open sans', 'Arial', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #253017;
+  background-color: #F9FAF7;
+}
+
+ul {
+  list-style-type: none;
+}

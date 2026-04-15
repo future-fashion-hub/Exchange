@@ -1,0 +1,66 @@
+.container {
+  margin: 0 auto;
+  padding: 0 36px;
+  box-sizing: border-box;
+}
+
+.section {
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-size: 40px;
+  font-weight: 500;
+  color: #253017;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.content {
+  text-align: center;
+}
+
+.paragraph {
+  font-size: 20px;
+  color: #253017;
+  margin-bottom: 20px;
+  padding: 0 48px;
+}
+
+.link {
+  color: #253017;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #ABD27A;
+}
+
+/* Стили для тимлидов - расположены по центру в одну строку */
+.teamLeads {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.teamLeadCard {
+  width: 282px;
+  min-height: 360px;
+}
+
+/* Сетка для остальных участников */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 282px);
+  /* 4 колонки */
+  gap: 24px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+.teamMemberCard {
+  width: 100%;
+  max-width: 282px;
+  min-height: 360px;
+}

@@ -1,0 +1,47 @@
+.slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1368px;
+  
+}
+
+.cardsWrapper {
+  display: flex;
+  width: 100%;
+  /* gap: 24px; */
+  gap: 1.5em;
+}
+
+button {
+  border: none;
+}
+
+.chevron {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* width: 32px;
+  height: 32px; */
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background-color: #E4E8DF;
+  cursor: pointer;
+}
+
+.chevronLeft {
+  left: 0;
+  transform: translateX(-50%);
+}
+
+.chevronRight {
+  right: 0;
+  transform: translateX(50%);
+}
+
+.iconChevronLeft {
+  transform: scaleX(-1);
+}
