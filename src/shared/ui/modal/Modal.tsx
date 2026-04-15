@@ -6,6 +6,7 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  overlayClassName?: string;
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
 }
@@ -15,6 +16,7 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   children,
   className = "",
+  overlayClassName = "",
   closeOnOverlayClick = true,
   closeOnEscape = true,
 }) => {
@@ -54,7 +56,7 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className={styles.overlay} onClick={handleOverlayClick}>
+    <div className={`${styles.overlay} ${overlayClassName}`} onClick={handleOverlayClick}>
       <div className={`${styles.modal} ${className}`}>{children}</div>
     </div>
   );

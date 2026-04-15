@@ -32,35 +32,35 @@ export const getFilteredUsersApi = async (params: any) => {
   return { users: response.data, hasMore: false }; 
 };
 
-export const getPopularUsersApi = async () => {
+export const getPopularUsersApi = async (page?: number) => {
   const response = await api.get('/skills');
   return { users: response.data, hasMore: false };
 };
 
-export const getCreatedAtUsersApi = async () => {
+export const getCreatedAtUsersApi = async (page?: number) => {
   const response = await api.get('/skills');
   return { users: response.data, hasMore: false };
 };
 
-export const getUsersApi = async () => {
+export const getUsersApi = async (page?: number) => {
   const response = await api.get('/skills');
   return { users: response.data, hasMore: false };
 };
 
-export const getUsersByRandomApi = async () => {
+export const getUsersByRandomApi = async (page?: number) => {
   const response = await api.get('/skills');
   return { users: response.data, hasMore: false };
 };
 
-export const getUserByIdAPI = async (id: string) => {
+export const getUserByIdAPI = async (id: string | number) => {
   const response = await api.get(`/users/${id}`);
   return response.data;
 };
 
 // ... other necessary mocks to keep app from crashing until fully refactored
-export const getPlacesApi = async () => ({});
-export const getSkillsCategoriesApi = async () => ({});
-export const getSkillsSubCategoriesApi = async () => ({});
-export const getOffersApi = async () => ({});
-export const getNotificationsApi = async () => ({ events: [] });
-export const getUserLikesApi = async () => ([]);
+export const getPlacesApi = async (): Promise<any> => ({ places: [] });
+export const getSkillsCategoriesApi = async (): Promise<any> => ({ categories: [] });
+export const getSkillsSubCategoriesApi = async (): Promise<any> => ({ subcategories: [] });
+export const getOffersApi = async (): Promise<any> => ({ offers: [] });
+export const getNotificationsApi = async (...args: any[]): Promise<any> => ({ events: [] });
+export const getUserLikesApi = async (userId: number): Promise<any> => ([]);

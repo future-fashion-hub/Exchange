@@ -138,3 +138,20 @@
 .dropdownGroup.error .dropdownButton:focus {
   border-color: #BF3920 !important;
 }
+
+.pillsContainer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  background-color: #abd27a;
+  color: #253017;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1;
+}

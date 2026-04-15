@@ -17,13 +17,14 @@ import { NotFoundPage } from "../pages/not-found-page/NotFoundPage";
 
 //То, что есть
 import { HomePage } from "../pages/HomePage";
-import { RegisterStep2 } from "../features/auth/RegisterStep2";
+
 import { ProfilePage } from "../pages/profile/ProfilePage";
 
 // Страницы регистрации
 import { RegistrationStep1 } from "../pages/registration/RegistrationStep1";
-import { RegistrationStep2 } from "../pages/registration/RegistrationStep2";
-import { RegistrationStep3 } from "../pages/registration/RegistrationStep3";
+
+import { RegistrationStep3Merged } from "../pages/registration/RegistrationStep3Merged";
+import { RegistrationStepMerged } from "../pages/registration/RegistrationStepMerged";
 
 import { ChatPage } from "../pages/chat/ChatPage";
 import { AdminDashboard } from "../pages/admin/AdminDashboard";
@@ -38,7 +39,7 @@ import { getCategoriesThunk } from "../services/categories/actions";
 import { getUserLikesThunk } from "../services/user/actions";
 
 import { OfferPage } from "../pages/Offer/OfferPage";
-import { RegisterStep2Data } from "../features/auth/RegisterStep2";
+
 import { getPopularUsersThunk } from "../services/popularUsers/actions";
 
 import { ScrollToTop } from "../features/scrollToTop/ScrollToTop";
@@ -48,7 +49,7 @@ import { getRandomUsersThunk } from "../services/randomUsers/actions";
 
 import { About } from "../pages/about/About";
 // import { getFilteredUsersThunk } from "../services/filteredUsers/actions";
-import { GENDERS, TGender } from "@api/types";
+// no need to import GENDERS or TGender
 import { getOffersThunk } from "../services/offers/actions";
 import { getOffers } from "../services/offers/offers-slice";
 import { getUsersThunk } from "../services/users/actions";
@@ -93,6 +94,37 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
+        {/* Страницы регистрации (без общего Layout, так как у них свой дизайн) */}
+        <Route
+          path="registration/step1"
+          element={
+            <RegistrationStep1
+              onContinue={(email, password) => {
+                console.log("Step 1 data:", email, password);
+                window.location.href = "/registration/step2";
+              }}
+            />
+          }
+        />
+        <Route
+          path="registration/step2"
+          element={
+            <RegistrationStepMerged />
+          }
+        />
+        <Route
+          path="registration/step3"
+          element={
+            <RegistrationStep3Merged
+              onBack={() => (window.location.href = "/registration/step2")}
+              onComplete={() => {
+                console.log("Step 3 data completed!");
+                window.location.href = "/";
+              }}
+            />
+          }
+        />
+
         <Route element={<Layout />}>
           {/*То, что есть*/}
           <Route index element={<HomePage />} />
@@ -103,40 +135,6 @@ export const App: React.FC = () => {
           <Route path="skills/:id" element={<OfferPage />} />
           <Route path="demo/dropdowns" element={<DropdownsDemoContent />} />
           <Route path="about" element={<About />} />
-
-          {/* Страницы регистрации */}
-          <Route
-            path="registration/step1"
-            element={
-              <RegistrationStep1
-                onContinue={(email, password) => {
-                  console.log("Step 1 data:", email, password);
-                  window.location.href = "/registration/step2";
-                }}
-              />
-            }
-          />
-          <Route
-            path="registration/step2"
-            element={
-              <RegistrationStep2
-                onBack={() => (window.location.href = "/registration/step1")}
-                onContinue={(data) => {
-                  console.log("Step 2 data:", data);
-                  window.location.href = "/registration/step3";
-                }}
-              />
-            }
-          />
-          <Route
-            path="registration/step3"
-            element={
-              <RegistrationStep3
-                onBack={() => (window.location.href = "/registration/step2")}
-                onComplete={() => (window.location.href = "/")}
-              />
-            }
-          />
 
           {/*заглушки*/}
           <Route path="favorites" element={<FavoritesPageStub />} />
@@ -180,26 +178,31 @@ const Layout: React.FC = () => (
 const CatalogContent: React.FC = () => {
   const users = useSelector((s: RootState) => s.users.users);
 
-  const [selectedGender, setSelectedGender] = React.useState<TGender>(
-    GENDERS.UNSPECIFIED
-  );
   const [selectedPlaces, setSelectedPlaces] = React.useState<string[]>([]);
 
   return (
-    <section className="page page-catalog">
-      <FilterSection
-        onGenderChange={setSelectedGender}
-        onPlacesChange={setSelectedPlaces}
-        selectedGender={selectedGender}
-        selectedPlaces={selectedPlaces}
-      />
-      <GridList
-        users={users}
-        // subCategories={subCategories}
-        loading={false}
-        hasMore={false}
-        onLoadMore={() => {}}
-      />
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="flex flex-col md:flex-row gap-8 items-start">
+        {/* Sidebar */}
+        <aside className="w-full md:w-1/4 flex-shrink-0 sticky top-24">
+          <FilterSection
+            onPlacesChange={setSelectedPlaces}
+            selectedPlaces={selectedPlaces}
+          />
+        </aside>
+
+        
+        {/* Main Grid Content */}
+        <main className="w-full md:w-3/4 flex-grow">
+          <GridList
+            users={users}
+            // subCategories={subCategories}
+            loading={false}
+            hasMore={false}
+            onLoadMore={() => {}}
+          />
+        </main>
+      </div>
     </section>
   );
 };
@@ -218,34 +221,37 @@ const LoginContent: React.FC = () => (
 // Регистрация
 const RegisterContent: React.FC = () => {
   const [step, setStep] = useState(1);
-  const [step2Data, setStep2Data] = useState<Partial<RegisterStep2Data> | null>(
-    null
-  );
+  const [step1Data, setStep1Data] = useState({ email: "", password: "" });
 
-  const handleStep2Continue = (data: RegisterStep2Data) => {
-    setStep2Data(data);
-    console.log("Данные регистрации:", data);
-    alert("Регистрация завершена! Данные: " + JSON.stringify(data, null, 2));
+  const handleStep1Continue = (email: string, password: string) => {
+    setStep1Data({ email, password });
+    setStep(2);
   };
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleStep1Continue = (email: string, password: string) => {
-    console.log("Шаг 1 данные:", email, password);
-    setStep(2);
-  };
-
   return (
-    <section className="page page-auth">
-      {step === 1 ? (
-        <AuthForm onContinue={handleStep1Continue} />
-      ) : (
-        <RegisterStep2
+    <section className="page page-auth w-full">
+      {step === 1 && (
+        <RegistrationStep1 onContinue={handleStep1Continue} />
+      )}
+      {step === 2 && (
+        <RegistrationStepMerged
           onBack={handleBack}
-          onContinue={handleStep2Continue}
-          initialData={step2Data || undefined}
+          onComplete={() => {
+            setStep(3);
+          }}
+        />
+      )}
+      {step === 3 && (
+        <RegistrationStep3Merged
+          onBack={handleBack}
+          onComplete={() => {
+            console.log("Registration complete!!");
+            window.location.href = "/";
+          }}
         />
       )}
     </section>

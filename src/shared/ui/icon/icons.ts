@@ -21,7 +21,6 @@ export type IconName =
   | 'home'
   | 'idea'
   | 'like'
-  | 'like-active'
   | 'lifestyle'
   | 'logo'
   | 'logout'

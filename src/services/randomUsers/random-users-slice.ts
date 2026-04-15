@@ -43,7 +43,7 @@ export const randomUsersSlice = createSlice({
         state.isLoading = false;
         if (action.payload.users.length > 0) {
           const existingIds = new Set(state.users.map((u) => u.id));
-          const newUsers = action.payload.users.filter((u) => !existingIds.has(u.id));
+          const newUsers = action.payload.users.filter((u: TUser) => !existingIds.has(u.id));
           if (newUsers.length > 0) {
             state.users = [...state.users, ...newUsers];
             state.page += 1;

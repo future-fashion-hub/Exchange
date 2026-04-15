@@ -1,14 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { Icon } from '../../../shared/ui/icon/Icon';
-import { SkillTag } from "../../skills/skillTag/SkillTag";
 import { TUser } from "../../../api/types";
 import { prepareSkillsToRender } from "../../../shared/lib/prepareSkillsToRender";
 import { RootState, useDispatch, useSelector } from '@store';
 import { setOfferUser } from '../../../services/users/users-slice';
-import { birthdayToFormatedAge, getImageUrl } from "../../../shared/lib/helpers";
-import { setUser } from "../../../services/user/user-slice";
-import { toggleLikeAction } from "../../../services/users/actions";
-import clsx from "clsx";
+import { getImageUrl } from "../../../shared/lib/helpers";
 
 type UserCardProps = {
   user: TUser;
@@ -17,10 +12,9 @@ type UserCardProps = {
 
 export const UserCard = ({
   user,
-  needAbout = false
 }: UserCardProps) => {
   const subCategories = useSelector((s: RootState) => s.categories.subcategories);
-  const { skillsCanRender, isRest, rest } = prepareSkillsToRender(
+  const { skillsCanRender } = prepareSkillsToRender(
     user.need_subcat,
     subCategories
   );
@@ -28,8 +22,16 @@ export const UserCard = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const age = birthdayToFormatedAge(user.birthdate);
   const avatar = getImageUrl(user.photo);
+  
+  // Create a placeholder cover image based on user ID or some static default
+  const coverImage = `https://images.unsplash.com/photo-${1500000000000 + (user.id * 1000)}?auto=format&fit=crop&w=600&q=80`;
+  
+  // Use user's primary offer as title, fallback to something else
+  const title = user.sub_text || (skillsCanRender[0] as string) || "Обучение и обмен опытом";
+  
+  // Category for the badge
+  const badge = user.sub_text ? user.sub_text.split(' ')[0] : "РАЗРАБОТКА";
 
   const onDetailsClick = () => {
     dispatch(setOfferUser(user));
@@ -37,88 +39,69 @@ export const UserCard = ({
   };
 
   return (
-    <article className={clsx(
-      "flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative group",
-      needAbout && "shadow-none border-none hover:shadow-none hover:transform-none"
-    )}>
+    <article className="flex flex-col w-full h-full bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 group">
       
-      {/* Decorative top colored border */}
-      <div className="h-2 w-full bg-gradient-to-r from-blue-400 to-indigo-500 absolute top-0 left-0"></div>
-
-      <div className="p-6 flex-grow flex flex-col pt-8">
-        {/* Header: Avatar, Name, Age, Like */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-4 cursor-pointer" onClick={() => dispatch(setUser(user))}>
-            <div className="relative">
-              <img 
-                src={avatar} 
-                alt="Аватар профиля" 
-                className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
-              />
-              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 border-2 border-white rounded-full"></div>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-primary transition-colors">{user.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{user.from}, {age}</p>
-            </div>
-          </div>
-          
-          {!needAbout && (
-            <button 
-              onClick={() => dispatch(toggleLikeAction(user.id))}
-              className={`p-2 rounded-full transition-colors ${user.likedByMe ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300'}`}
-            >
-              <svg className="w-5 h-5" fill={user.likedByMe ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-            </button>
-          )}
+      {/* Cover Image */}
+      <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+        <img 
+           src={coverImage}
+           alt="Cover"
+           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+           onError={(e) => {
+             // Fallback image if unsplash fails
+             (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80';
+           }}
+        />
+        <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-900 dark:text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-sm uppercase tracking-wider">
+           <svg className="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+           {badge}
         </div>
-
-        {needAbout && (
-          <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
-            {user.about}
-          </p>
-        )}
-
-        {/* Skills Section */}
-        <div className="mt-2 space-y-4 flex-grow">
-          <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Может научить</p>
-            <div className="flex flex-wrap gap-2">
-               <span className="inline-block px-3 py-1 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-xs font-bold rounded-full border border-green-100 dark:border-green-800">
-                 {user.sub_text || "Дизайн интерфейсов"}
-               </span>
-            </div>
-          </div>
-          
-          <div>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Хочет научиться</p>
-            <div className="flex flex-wrap gap-2">
-              {skillsCanRender.map((item, index) => (
-                <span key={index} className="inline-block px-3 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-bold rounded-full border border-blue-100 dark:border-blue-800">
-                  {item as string}
-                </span>
-              ))}
-              {isRest && (
-                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs font-bold rounded-full">
-                  +{rest}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      {!needAbout && (
-        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700 flex justify-center">
+      <div className="p-6 flex-grow flex flex-col pt-6">
+        {/* Author Info */}
+        <div className="flex items-center gap-3 mb-4">
+           <div className="relative">
+             <img 
+               src={avatar} 
+               alt={user.name} 
+               className="w-12 h-12 rounded-full object-cover border border-gray-100 dark:border-gray-600"
+             />
+           </div>
+           <div>
+             <h3 className="font-bold text-sm text-gray-900 dark:text-white">{user.name}</h3>
+             <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+               <svg className="w-3.5 h-3.5 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+               <span className="font-semibold text-gray-700 dark:text-gray-300">4.9</span>
+               <span className="ml-1 opacity-75">(12 обменов)</span>
+             </div>
+           </div>
+        </div>
+
+        {/* Content */}
+        <h4 className="font-extrabold text-xl text-gray-900 dark:text-white mb-3 line-clamp-2 hover:text-primary transition-colors cursor-pointer" onClick={onDetailsClick}>
+          {title}
+        </h4>
+        
+        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-6 flex-grow">
+          {user.about || "Свяжитесь со мной для подробностей. Буду рад обсудить возможности сотрудничества и обмена навыками в удобное для нас время."}
+        </p>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3 mt-auto pt-2">
           <button 
             onClick={onDetailsClick}
-            className="w-full py-2.5 bg-white dark:bg-gray-800 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 shadow-sm"
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 py-3 px-4 rounded-full font-semibold text-sm transition-colors text-center"
           >
             Подробнее
           </button>
+          <button 
+            className="flex-1 bg-blue-50 text-primary hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-colors text-center uppercase"
+          >
+            Обменять
+          </button>
         </div>
-      )}
+      </div>
     </article>
   );
 };

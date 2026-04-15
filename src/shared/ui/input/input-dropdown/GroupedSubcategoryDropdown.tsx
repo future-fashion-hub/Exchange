@@ -89,7 +89,18 @@ export const GroupedSubcategoryDropdown: FC<GroupedSubcategoryDropdownProps> = (
 
   const getDisplayText = () => {
     if (selectedSubcategoryIds.length > 0) {
-      return `Выбрано: ${selectedSubcategoryIds.length}`;
+      return (
+        <div className={styles.pillsContainer}>
+          {selectedSubcategoryIds.map((id) => {
+            const subName = subcategories.find((s) => s.id.toString() === id)?.name || id;
+            return (
+              <span key={id} className={styles.pill}>
+                {subName}
+              </span>
+            );
+          })}
+        </div>
+      );
     }
     return placeholder;
   };

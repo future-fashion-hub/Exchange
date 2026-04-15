@@ -1,8 +1,5 @@
-// src\widgets\header\Header.tsx
-
 import { FC, useEffect, useState, useCallback, useRef } from "react";
-import { Link } from "react-router-dom";
-import styles from "./Header.module.css";
+import { Link, useLocation } from "react-router-dom";
 import { Logo } from "../../shared/ui/logo/Logo";
 import { Button } from "../../shared/ui/button/Button";
 import { NotificationWidget } from "../notification-widget/NotificationWidget";
@@ -20,7 +17,6 @@ import { RootState } from "@store";
 import clsx from "clsx";
 import { RegistrationModal } from "../../features/registration/RegistrationModal";
 
-// type PopupType = "skills" | "profile" | "notifications" | null;
 export const POPUP_TYPES = {
   SKILLS: "skills",
   PROFILE: "profile",
@@ -42,9 +38,10 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = ({
   onOpenRegistration,
 }) => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const [isOpenPopup, setOpenPopup] = useState<PopupType>(null);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
- const closeModalRef = useRef(() => setIsRegistrationModalOpen(false));
+  const closeModalRef = useRef(() => setIsRegistrationModalOpen(false));
 
   const currentUser = useSelector(getCurrentUser);
   const plainUsers = useSelector(getPlainUsers);
@@ -81,116 +78,105 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = ({
     closeModalRef.current();
   }, []);
 
+  // For Nav links styling
+  const navLinkClass = (path: string) => clsx(
+    "text-sm font-medium transition-colors hover:text-primary",
+    location.pathname === path ? "text-primary border-b-2 border-primary pb-1" : "text-gray-600 dark:text-gray-300"
+  );
+
   return (
-    <header
-      className={styles.header}
-      style={
-        currentUser
-          ? { maxHeight: "116px", padding: "42px 36px 26px" }
-          : { maxHeight: "104px", padding: "36px 36px 20px" }
-      }
-    >
-      <Link to="/">
-        <Logo />
-      </Link>
+    <header className="w-full flex justify-between items-center px-4 md:px-8 py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-50 sticky top-0">
+      <div className="flex items-center gap-8">
+        <Link to="/">
+          <div className="flex items-center text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <span className="text-primary italic mr-1">Exchange</span>
+          </div>
+        </Link>
+        <nav className="hidden md:block">
+          <ul className="flex items-center gap-6">
+            <li>
+              <Link to="/skills" className={navLinkClass("/skills")}>
+                Каталог
+              </Link>
+            </li>
+            {currentUser && (
+               <li>
+                 <Link to="/requests" className={navLinkClass("/requests")}>
+                   Мои запросы
+                 </Link>
+               </li>
+            )}
+            <li>
+              <Link to="/about" className={navLinkClass("/about")}>
+                О сервисе
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
-      <nav>
-        <ul className={styles.navList}>
-          <li className={styles.li}>
-            <Link
-              to="/about"
-              className={styles.link}
-              onClick={() => console.log("Click on About link")}
-            >
-              О проекте
-            </Link>
-          </li>
-          <li className={styles.li}>
-            <button
-              className={clsx(styles.link, styles.dropButton)}
-              onClick={() => togglePopup(POPUP_TYPES.SKILLS)}
-            >
-              Все навыки
-              <Icon
-                name={
-                  isOpenPopup === POPUP_TYPES.SKILLS
-                    ? "chevronUp"
-                    : "chevronDown"
-                }
-                size="s"
-                className={styles.iconChevron}
-              />
-            </button>
-          </li>
-        </ul>
-      </nav>
+      <div className="flex-1 max-w-lg mx-6">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Icon name="search" size="s" className="text-gray-400" />
+          </div>
+          <input
+            type="search"
+            className="block w-full pl-10 pr-3 py-2 border-none rounded-full leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white sm:text-sm"
+            placeholder="Поиск навыков..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </div>
 
-      {/* Используем компонент SearchBar с разной шириной */}
-      <SearchBar
-        maxWidth={currentUser ? 648 : 527}
-        value={query}
-        onChange={setQuery}
-      />
-
-      {!currentUser && (
-        <button className={styles.moonButton}>
-          <Icon name="moon" size="s" />
-        </button>
-      )}
-
-      <div className={styles.rightSection}>
-        {/* Иконки уведомлений и лайков только для авторизованных */}
-        {currentUser && (
+      <div className="flex items-center gap-4">
+        {currentUser ? (
           <>
-            <button className={styles.moonButton}>
+            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
               <Icon name="moon" size="s" />
             </button>
             <button
-              className={styles.notificationButton}
+              className="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
               onClick={() => togglePopup(POPUP_TYPES.NOTIFICATIONS)}
             >
-              <div className={styles.iconWrapper}>
-                <Icon name="notification" size={20} strokeWidth={5} />
-              </div>
+              <Icon name="notification" size={20} />
             </button>
-            <button className={styles.likeButton}>
+            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
               <Icon name="like" size="s" />
             </button>
+            <div
+              className="flex items-center gap-3 cursor-pointer ml-2"
+              onClick={() => togglePopup(POPUP_TYPES.PROFILE)}
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden lg:block">{currentUser.name}</span>
+              <img
+                src={getImageUrl(currentUser.photo)}
+                alt={currentUser.name}
+                className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+              />
+            </div>
           </>
-        )}
-
-        {/* Блок пользователя или кнопки входа */}
-        {currentUser ? (
-          <div
-            className={styles.userAuthWrapper}
-            onClick={() => togglePopup(POPUP_TYPES.PROFILE)}
-            style={{ cursor: "pointer" }}
-          >
-            <span className={styles.userName}>{currentUser.name}</span>
-            <img
-              src={getImageUrl(currentUser.photo)}
-              alt={currentUser.name}
-              className={styles.userAvatar}
-            />
-          </div>
         ) : (
-          <div className={styles.buttonsWrapper}>
-            <Button size={92} onClick={handleLogin}>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleLogin} 
+              className="text-sm font-semibold text-gray-700 hover:text-primary dark:text-gray-200 transition-colors"
+            >
               Войти
-            </Button>
-            <Button size={208} onClick={handleRegistration} colored>
-              Зарегистрироваться
-            </Button>
+            </button>
+            <Link 
+              to="/registration/step1"
+              className="bg-primary hover:bg-secondary text-white text-sm font-semibold py-2 px-5 rounded-full shadow-md transition-colors"
+            >
+               Регистрация
+            </Link>
           </div>
         )}
       </div>
 
-      {/* Попапы */}
       {currentUser ? (
-        <Popup
-          isOpen={isOpenPopup === POPUP_TYPES.NOTIFICATIONS}
-          onClose={closePopup}
-        >
+        <Popup isOpen={isOpenPopup === POPUP_TYPES.NOTIFICATIONS} onClose={closePopup}>
           <NotificationWidget />
         </Popup>
       ) : null}
