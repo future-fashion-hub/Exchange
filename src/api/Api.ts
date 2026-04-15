@@ -42,6 +42,16 @@ export const getCreatedAtUsersApi = async () => {
   return { users: response.data, hasMore: false };
 };
 
+export const getUsersApi = async () => {
+  const response = await api.get('/skills');
+  return { users: response.data, hasMore: false };
+};
+
+export const getUsersByRandomApi = async () => {
+  const response = await api.get('/skills');
+  return { users: response.data, hasMore: false };
+};
+
 export const getUserByIdAPI = async (id: string) => {
   const response = await api.get(`/users/${id}`);
   return response.data;
