@@ -1,6 +1,15 @@
 import api from './AxiosClient';
 import { TUser } from './types';
 
+export type TServerMessage = {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  text: string;
+  createdAt: string;
+  readAt: string | null;
+};
+
 // Auth APIs
 export const registerApi = async (data: any) => {
   const response = await api.post('/auth/register', data);
@@ -21,6 +30,37 @@ export const loginApi = async (data: any) => {
 export const logoutApi = () => {
   localStorage.removeItem('token');
   return Promise.resolve({ success: true });
+};
+
+export const getMeApi = async () => {
+  const response = await api.get('/auth/me');
+  return response.data;
+};
+
+export const updateMeApi = async (data: Partial<{ fullName: string; bio: string; location: string; avatarUrl: string; offerTags: string[]; seekTags: string[]; isPrivate: boolean }>) => {
+  const response = await api.put('/users/me', data);
+  return response.data;
+};
+
+export const uploadAvatarApi = async (file: File) => {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await api.post('/upload/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  return response.data as { avatarUrl: string };
+};
+
+export const getConversationApi = async (peerId: string) => {
+  const response = await api.get(`/messages/${peerId}`);
+  return response.data as TServerMessage[];
+};
+
+export const sendMessageApi = async (receiverId: string, text: string) => {
+  const response = await api.post('/messages', { receiverId, text });
+  return response.data as TServerMessage;
 };
 
 // Skills APIs

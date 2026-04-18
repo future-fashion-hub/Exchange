@@ -1,7 +1,7 @@
 // src/app/App.tsx
 
 import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from "react-router-dom";
 
 import {
   DropdownDemo,
@@ -55,6 +55,7 @@ import { getOffers } from "../services/offers/offers-slice";
 import { getUsersThunk } from "../services/users/actions";
 
 import { HeaderWithModal } from '../widgets/header/HeaderWithModal';
+import { registerApi } from "../api/Api";
 
 import styles from "./App.module.css";
 
@@ -99,9 +100,14 @@ export const App: React.FC = () => {
           path="registration/step1"
           element={
             <RegistrationStep1
-              onContinue={(email, password) => {
-                console.log("Step 1 data:", email, password);
-                window.location.href = "/registration/step2";
+              onContinue={async (fullName, email, password) => {
+                try {
+                  await registerApi({ fullName, email, password });
+                  window.location.href = "/registration/step2";
+                } catch (error) {
+                  console.error("Registration step 1 error:", error);
+                  alert("Не удалось зарегистрироваться. Проверьте данные и повторите попытку.");
+                }
               }}
             />
           }
@@ -164,15 +170,20 @@ export const App: React.FC = () => {
 };
 
 //Общий Layout (для всех КРОМЕ главной), чтобы не дублировать везде хедер и футер
-const Layout: React.FC = () => (
-  <div className="layout">
-    <HeaderWithModal />
-    <main className={styles.main}>
-      <Outlet />
-    </main>
-    <Footer />
-  </div>
-);
+const Layout: React.FC = () => {
+  const location = useLocation();
+  const isRegistrationFlow = location.pathname.startsWith("/auth/register");
+
+  return (
+    <div className="layout">
+      {!isRegistrationFlow && <HeaderWithModal />}
+      <main className={styles.main}>
+        <Outlet />
+      </main>
+      {!isRegistrationFlow && <Footer />}
+    </div>
+  );
+};
 
 //Каталог (FilterSection + GridList)
 const CatalogContent: React.FC = () => {
@@ -221,11 +232,17 @@ const LoginContent: React.FC = () => (
 // Регистрация
 const RegisterContent: React.FC = () => {
   const [step, setStep] = useState(1);
-  const [step1Data, setStep1Data] = useState({ email: "", password: "" });
+  const [step1Data, setStep1Data] = useState({ fullName: "", email: "", password: "" });
 
-  const handleStep1Continue = (email: string, password: string) => {
-    setStep1Data({ email, password });
-    setStep(2);
+  const handleStep1Continue = async (fullName: string, email: string, password: string) => {
+    try {
+      await registerApi({ fullName, email, password });
+      setStep1Data({ fullName, email, password });
+      setStep(2);
+    } catch (error) {
+      console.error("Registration step 1 error:", error);
+      alert("Не удалось зарегистрироваться. Проверьте данные и повторите попытку.");
+    }
   };
 
   const handleBack = () => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Icon } from '../../shared/ui/icon/Icon';
+import { updateMeApi, uploadAvatarApi } from '../../api/Api';
 
 export interface RegistrationStep3MergedProps {
   onBack?: () => void;
@@ -13,23 +14,51 @@ export const RegistrationStep3Merged: React.FC<RegistrationStep3MergedProps> = (
   onClose
 }) => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [locationType, setLocationType] = useState<'remote' | 'city'>('remote');
   const [city, setCity] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      setAvatarFile(file);
       const imageUrl = URL.createObjectURL(file);
       setAvatarPreview(imageUrl);
     }
   };
 
-  const handleContinue = () => {
-    if (onComplete) {
-      onComplete();
-    } else {
-      window.location.href = '/';
+  const handleContinue = async () => {
+    if (isSaving) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      let avatarUrl: string | undefined;
+
+      if (avatarFile) {
+        const uploaded = await uploadAvatarApi(avatarFile);
+        avatarUrl = uploaded.avatarUrl;
+      }
+
+      await updateMeApi({
+        location: locationType === 'remote' ? 'Удаленно' : city,
+        isPrivate,
+        ...(avatarUrl ? { avatarUrl } : {}),
+      });
+
+      if (onComplete) {
+        onComplete();
+      } else {
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Registration step 3 save error:', error);
+      alert('Не удалось сохранить данные шага 3. Повторите попытку.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -43,24 +72,14 @@ export const RegistrationStep3Merged: React.FC<RegistrationStep3MergedProps> = (
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Header */}
-      <header className="flex justify-between items-center px-8 py-4 bg-white shadow-sm">
-        <div className="flex items-center gap-2 text-indigo-600 font-bold text-xl cursor-pointer" onClick={() => window.location.href='/'}>
-          <Icon name="logo" size={32} />
-          <span className="text-gray-900">SkillSwap</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-gray-500 font-medium">Шаг 3 из 3</div>
-          {onClose && (
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <Icon name="cross" size={24} />
-            </button>
-          )}
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto py-10 px-4">
+        <div className="mb-6 flex justify-between gap-2 max-w-md mx-auto">
+          <div className="h-1 w-1/3 bg-primary rounded"></div>
+          <div className="h-1 w-1/3 bg-primary rounded"></div>
+          <div className="h-1 w-1/3 bg-primary rounded"></div>
+        </div>
+
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2 text-center">Завершите свой профиль</h1>
         <p className="text-center text-gray-500 mb-8 max-w-xl mx-auto">
           Добавьте финальные штрихи к вашему цифровому ателье, чтобы начать общение с кураторами со всего мира.
@@ -221,9 +240,10 @@ export const RegistrationStep3Merged: React.FC<RegistrationStep3MergedProps> = (
           <button 
             type="button" 
             onClick={handleContinue}
+            disabled={isSaving}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-full shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
           >
-            Завершить регистрацию
+            {isSaving ? 'Сохраняем...' : 'Завершить регистрацию'}
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>

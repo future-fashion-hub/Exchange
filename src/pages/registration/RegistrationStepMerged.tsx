@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Icon } from "../../shared/ui/icon/Icon";
+import { updateMeApi, uploadAvatarApi } from "../../api/Api";
 
 export interface RegistrationStepMergedProps {
   onBack?: () => void;
@@ -16,20 +17,49 @@ export const RegistrationStepMerged: React.FC<RegistrationStepMergedProps> = ({
   const [seekTags, setSeekTags] = useState<string[]>(["Frontend", "React", "TypeScript"]);
   const [bio, setBio] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleBack = () => {
     if (onBack) onBack();
     else window.location.href = "/registration/step1";
   };
 
-  const handleContinue = () => {
-    if (onComplete) onComplete();
-    else window.location.href = "/registration/step3";
+  const handleContinue = async () => {
+    if (isSaving) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      let avatarUrl: string | undefined;
+
+      if (avatarFile) {
+        const uploaded = await uploadAvatarApi(avatarFile);
+        avatarUrl = uploaded.avatarUrl;
+      }
+
+      await updateMeApi({
+        bio,
+        offerTags,
+        seekTags,
+        ...(avatarUrl ? { avatarUrl } : {}),
+      });
+
+      if (onComplete) onComplete();
+      else window.location.href = "/registration/step3";
+    } catch (error) {
+      console.error("Registration step 2 save error:", error);
+      alert("Не удалось сохранить данные шага 2. Повторите попытку.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onload = (ev) => {
         setAvatarPreview(ev.target?.result as string);
@@ -40,17 +70,14 @@ export const RegistrationStepMerged: React.FC<RegistrationStepMergedProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Header */}
-      <header className="flex justify-between items-center px-8 py-4 bg-white shadow-sm">
-        <div className="flex items-center gap-2 text-indigo-600 font-bold text-xl">
-          <Icon name="logo" size={32} />
-          <span>SkillSwap</span>
-        </div>
-        <div className="text-gray-500 font-medium">Шаг 2 из 3</div>
-      </header>
-
       {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto py-10 px-4">
+        <div className="mb-6 flex justify-between gap-2 max-w-md mx-auto">
+          <div className="h-1 w-1/3 bg-primary rounded"></div>
+          <div className="h-1 w-1/3 bg-primary rounded"></div>
+          <div className="h-1 w-1/3 bg-gray-200 rounded"></div>
+        </div>
+
         <h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">Создайте свой профиль навыков</h1>
 
         <div className="space-y-6">
@@ -132,8 +159,8 @@ export const RegistrationStepMerged: React.FC<RegistrationStepMergedProps> = ({
 
             {/* Right: Photo */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center text-center">
-              <h2 className="text-xl font-bold text-gray-900 mb-2 w-full text-left">Фото профиля</h2>
-              <p className="text-gray-500 text-sm mb-6 w-full text-left">Загрузите свое фото для большего доверия</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-2 w-full text-left">Превью карточки навыков</h2>
+              <p className="text-gray-500 text-sm mb-6 w-full text-left">Это фото для карточки навыков, не для основного профиля.</p>
               
               <div className="relative group w-32 h-32 mb-4">
                 {avatarPreview ? (
@@ -164,9 +191,10 @@ export const RegistrationStepMerged: React.FC<RegistrationStepMergedProps> = ({
           </button>
           <button 
             onClick={handleContinue}
+            disabled={isSaving}
             className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors"
           >
-            Продолжить к шагу 3 &rarr;
+            {isSaving ? "Сохраняем..." : "Продолжить к шагу 3 →"}
           </button>
         </div>
       </main>

@@ -31,6 +31,10 @@ model User {
   role          Role      @default(USER)
   fullName      String
   bio           String?
+  avatarUrl     String?
+  offerTags     String[]  @default([])
+  seekTags      String[]  @default([])
+  isPrivate     Boolean   @default(false)
   rating        Float     @default(0.0)
   location      String?
   createdAt     DateTime  @default(now())
@@ -54,6 +58,7 @@ model Skill {
   title       String
   description String
   type        SkillType
+  images      String[]  @default([])
   userId      String
   categoryId  String
   createdAt   DateTime  @default(now())
@@ -80,6 +85,7 @@ model Message {
   receiverId  String
   text        String
   createdAt   DateTime  @default(now())
+  readAt      DateTime?
 
   sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver    User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)

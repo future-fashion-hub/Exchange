@@ -1,18 +1,104 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getConversationApi, sendMessageApi, TServerMessage } from '../../api/Api';
+import { connectSocket, disconnectSocket } from '../../shared/lib/socketClient';
+
+type TChatPreview = {
+  id: string;
+  name: string;
+  msg: string;
+  time: string;
+};
+
+const formatTime = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const parseUserIdFromToken = (token: string | null): string => {
+  if (!token) {
+    return '';
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return typeof payload.id === 'string' ? payload.id : '';
+  } catch {
+    return '';
+  }
+};
 
 export const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    { id: 1, text: 'Привет! Мне интересен твой навык.', sender: 'other', time: '10:00' },
-    { id: 2, text: 'Добрый день! Отлично, когда вам удобно созвониться?', sender: 'me', time: '10:05' },
-    { id: 3, text: 'Могу завтра вечером. В 19:00 по Москве подойдет?', sender: 'other', time: '10:10' }
+  const [messages, setMessages] = useState<TServerMessage[]>([]);
+  const [selectedPeerId, setSelectedPeerId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const token = localStorage.getItem('token');
+  const currentUserId = useMemo(() => parseUserIdFromToken(token), [token]);
+
+  const [chatList] = useState<TChatPreview[]>([
+    { id: 'peer-1', name: 'Елена Родригес', msg: 'Могу завтра вечером. В...', time: '10:10' },
+    { id: 'peer-2', name: 'Джулиан Чен', msg: 'Спасибо за урок!', time: 'Вчера' },
+    { id: 'peer-3', name: 'Анна Смирнова', msg: 'Жду подтверждения', time: 'Пн' },
   ]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    const socket = connectSocket(token);
+
+    socket.on('chat:new_message', (incoming: TServerMessage) => {
+      if (
+        incoming.senderId === selectedPeerId ||
+        (incoming.senderId === currentUserId && incoming.receiverId === selectedPeerId)
+      ) {
+        setMessages((prev) => [...prev, incoming]);
+      }
+    });
+
+    socket.on('notify:new', () => {
+      // Notification stream is intentionally handled in websocket layer.
+    });
+
+    return () => {
+      socket.off('chat:new_message');
+      socket.off('notify:new');
+      disconnectSocket();
+    };
+  }, [token, selectedPeerId, currentUserId]);
+
+  useEffect(() => {
+    if (!selectedPeerId || !token) {
+      return;
+    }
+
+    setIsLoading(true);
+    getConversationApi(selectedPeerId)
+      .then((items) => setMessages(items))
+      .catch(() => setMessages([]))
+      .finally(() => setIsLoading(false));
+  }, [selectedPeerId, token]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    setMessages([...messages, { id: Date.now(), text: message, sender: 'me', time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }]);
-    setMessage('');
+    if (!message.trim() || !selectedPeerId) {
+      return;
+    }
+
+    const text = message.trim();
+    sendMessageApi(selectedPeerId, text)
+      .then((created) => {
+        setMessages((prev) => [...prev, created]);
+        setMessage('');
+      })
+      .catch(() => {
+        // Errors are intentionally non-blocking for draft UX.
+      });
   };
 
   return (
@@ -28,12 +114,12 @@ export const ChatPage: React.FC = () => {
           </div>
         </div>
         <div className="flex-grow overflow-y-auto">
-          {[
-            { name: 'Елена Родригес', msg: 'Могу завтра вечером. В...', time: '10:10', active: true },
-            { name: 'Джулиан Чен', msg: 'Спасибо за урок!', time: 'Вчера', active: false },
-            { name: 'Анна Смирнова', msg: 'Жду подтверждения', time: 'Пн', active: false },
-          ].map((chat, i) => (
-            <div key={i} className={`p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${chat.active ? 'bg-blue-50 dark:bg-gray-700 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}>
+          {chatList.map((chat) => (
+            <div
+              key={chat.id}
+              onClick={() => setSelectedPeerId(chat.id)}
+              className={`p-4 border-b border-gray-50 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${selectedPeerId === chat.id ? 'bg-blue-50 dark:bg-gray-700 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}
+            >
                <div className="flex justify-between items-baseline mb-1">
                  <h4 className="font-bold text-gray-900 dark:text-white">{chat.name}</h4>
                  <span className="text-xs text-gray-400">{chat.time}</span>
@@ -64,16 +150,19 @@ export const ChatPage: React.FC = () => {
 
         {/* Chat Messages */}
         <div className="flex-grow p-6 overflow-y-auto space-y-6">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] rounded-2xl px-5 py-3 ${msg.sender === 'me' ? 'bg-primary text-white rounded-br-none shadow-md' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700'}`}>
+          {isLoading && <p className="text-sm text-gray-400">Загрузка истории...</p>}
+          {!isLoading && messages.map((msg) => {
+            const isMine = msg.senderId === currentUserId;
+            return (
+            <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[70%] rounded-2xl px-5 py-3 ${isMine ? 'bg-primary text-white rounded-br-none shadow-md' : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700'}`}>
                 <p>{msg.text}</p>
-                <div className={`text-xs mt-2 text-right ${msg.sender === 'me' ? 'text-blue-200' : 'text-gray-400'}`}>
-                  {msg.time}
+                <div className={`text-xs mt-2 text-right ${isMine ? 'text-blue-200' : 'text-gray-400'}`}>
+                  {formatTime(msg.createdAt)}
                 </div>
               </div>
             </div>
-          ))}
+          );})}
         </div>
 
         {/* Message Input */}

@@ -12,7 +12,7 @@ export const GENDERS = {
 export type TGender = (typeof GENDERS)[keyof typeof GENDERS];
 
 export type TUser = {
-  id: number;
+  id: string | number;
   name: string;
   gender: TGender;
   photo: string; //Фото профиля

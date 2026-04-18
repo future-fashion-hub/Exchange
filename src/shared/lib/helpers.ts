@@ -3,6 +3,25 @@
 import { USERS_PHOTO_PATH, TEAM_PHOTO_PATH } from "@const/paths";
 import { TCategory, TSubcategory } from "@api/types";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
+
+export const toAbsoluteServerUrl = (pathOrUrl: string): string => {
+  if (!pathOrUrl) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(pathOrUrl)) {
+    return pathOrUrl;
+  }
+
+  if (pathOrUrl.startsWith('/')) {
+    return `${API_ORIGIN}${pathOrUrl}`;
+  }
+
+  return `${API_ORIGIN}/${pathOrUrl}`;
+};
+
 export const birthdayToFormatedAge = (birthdate: string): string => {
   return formatAge(calculateAge(birthdate));
 }
@@ -41,10 +60,18 @@ const calculateAge = (birthdate: string): string => {
 };
 
 export const getImageUrl = (photoPath: string, type: 'user' | 'team' = 'user'): string => {
-  if (type === 'team') {
-    return `${TEAM_PHOTO_PATH}${photoPath}`;
+  if (!photoPath) {
+    return '';
   }
-  return `${USERS_PHOTO_PATH}${photoPath}`;
+
+  if (photoPath.startsWith('/uploads') || photoPath.startsWith('/db') || /^https?:\/\//i.test(photoPath)) {
+    return toAbsoluteServerUrl(photoPath);
+  }
+
+  if (type === 'team') {
+    return toAbsoluteServerUrl(`${TEAM_PHOTO_PATH}${photoPath}`);
+  }
+  return toAbsoluteServerUrl(`${USERS_PHOTO_PATH}${photoPath}`);
 };
 
 /*

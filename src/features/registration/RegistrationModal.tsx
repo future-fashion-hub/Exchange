@@ -3,6 +3,7 @@ import { Modal } from "../../shared/ui/modal/Modal";
 import { RegistrationStep1 } from "../../pages/registration/RegistrationStep1";
 import { RegistrationStepMerged } from "../../pages/registration/RegistrationStepMerged";
 import { RegistrationStep3Merged } from "../../pages/registration/RegistrationStep3Merged";
+import { registerApi } from "../../api/Api";
 import styles from './RegistrationModal.module.css';
 
 interface RegistrationModalProps {
@@ -17,11 +18,17 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   onRegistrationComplete,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [step1Data, setStep1Data] = useState({ email: "", password: "" });
+  const [step1Data, setStep1Data] = useState({ fullName: "", email: "", password: "" });
 
-  const handleStep1Continue = (email: string, password: string) => {
-    setStep1Data({ email, password });
-    setCurrentStep(2);
+  const handleStep1Continue = async (fullName: string, email: string, password: string) => {
+    try {
+      await registerApi({ fullName, email, password });
+      setStep1Data({ fullName, email, password });
+      setCurrentStep(2);
+    } catch (error) {
+      console.error("Registration step 1 error:", error);
+      alert("Не удалось зарегистрироваться. Проверьте данные и повторите попытку.");
+    }
   };
 
   const handleBack = () => {

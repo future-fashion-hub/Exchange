@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export const RegistrationStep1: React.FC<{ onContinue: (email: string, pass: string) => void, onClose?: () => void }> = ({ onContinue, onClose }) => {
+export const RegistrationStep1: React.FC<{ onContinue: (fullName: string, email: string, pass: string) => void | Promise<void>, onClose?: () => void }> = ({ onContinue, onClose }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,8 +10,7 @@ export const RegistrationStep1: React.FC<{ onContinue: (email: string, pass: str
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === passwordRepeat && email && name) {
-      // In real scenario, we'll store name and email in Redux or Context
-      onContinue(email, password);
+      void onContinue(name, email, password);
     }
   };
 

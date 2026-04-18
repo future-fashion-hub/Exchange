@@ -3,7 +3,7 @@ import { TUser } from "../../../api/types";
 import { prepareSkillsToRender } from "../../../shared/lib/prepareSkillsToRender";
 import { RootState, useDispatch, useSelector } from '@store';
 import { setOfferUser } from '../../../services/users/users-slice';
-import { getImageUrl } from "../../../shared/lib/helpers";
+import { getImageUrl, toAbsoluteServerUrl } from "../../../shared/lib/helpers";
 
 type UserCardProps = {
   user: TUser;
@@ -23,9 +23,7 @@ export const UserCard = ({
   const navigate = useNavigate();
 
   const avatar = getImageUrl(user.photo);
-  
-  // Create a placeholder cover image based on user ID or some static default
-  const coverImage = `https://images.unsplash.com/photo-${1500000000000 + (user.id * 1000)}?auto=format&fit=crop&w=600&q=80`;
+  const coverImage = user.images?.[0] ? toAbsoluteServerUrl(user.images[0]) : avatar;
   
   // Use user's primary offer as title, fallback to something else
   const title = user.sub_text || (skillsCanRender[0] as string) || "Обучение и обмен опытом";
@@ -48,8 +46,7 @@ export const UserCard = ({
            alt="Cover"
            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
            onError={(e) => {
-             // Fallback image if unsplash fails
-             (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80';
+             (e.target as HTMLImageElement).src = avatar;
            }}
         />
         <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-900 dark:text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-sm uppercase tracking-wider">
