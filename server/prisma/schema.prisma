@@ -24,14 +24,31 @@ enum SkillType {
   LEARN
 }
 
+enum UserModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  ACCOUNT_ON_MODERATION
+  ACCOUNT_APPROVED
+  ACCOUNT_REJECTED
+  CHAT_MESSAGE
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
   passwordHash  String
   role          Role      @default(USER)
+  moderationStatus UserModerationStatus @default(PENDING)
   fullName      String
+  gender        String    @default("unspecified")
+  birthdate     DateTime?
   bio           String?
   avatarUrl     String?
+  cardImageUrl  String?
   offerTags     String[]  @default([])
   seekTags      String[]  @default([])
   isPrivate     Boolean   @default(false)
@@ -45,6 +62,7 @@ model User {
   offersReceived OfferExchange[] @relation("Receiver")
   messagesSent  Message[]       @relation("MessageSender")
   messagesReceived Message[]    @relation("MessageReceiver")
+  notifications Notification[]
 }
 
 model Category {
@@ -89,4 +107,16 @@ model Message {
 
   sender      User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver    User      @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
