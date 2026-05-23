@@ -1,7 +1,23 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../prisma';
+import { AuthRequest, authenticateToken } from '../middleware/auth';
 
 const router = Router();
+
+// GET /api/skills/categories
+router.get('/categories', async (_req: Request, res: Response) => {
+  try {
+    const categories = await prisma.category.findMany({
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true },
+    });
+
+    return res.json(categories);
+  } catch (error) {
+    console.error('Get categories error:', error);
+    return res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
 
 // GET /api/skills
 router.get('/', async (req: Request, res: Response) => {
@@ -28,6 +44,7 @@ router.get('/', async (req: Request, res: Response) => {
             fullName: true,
             rating: true,
             avatarUrl: true,
+            cardImageUrl: true,
             bio: true,
             location: true,
             email: true,
@@ -44,7 +61,7 @@ router.get('/', async (req: Request, res: Response) => {
       id: skill.user.id,
       name: skill.user.fullName,
       gender: 'unspecified',
-      photo: skill.user.avatarUrl || '',
+      photo: skill.user.cardImageUrl || skill.user.avatarUrl || '',
       from: skill.user.location || '',
       skill: skill.title,
       need_subcat: [],
@@ -66,6 +83,81 @@ router.get('/', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Get skills error:', error);
     res.status(500).json({ message: 'Ошибка сервера' });
+  }
+});
+
+// POST /api/skills
+router.post('/', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const {
+      title,
+      description,
+      type,
+      categoryId,
+      categoryName,
+      images,
+    } = req.body as {
+      title?: string;
+      description?: string;
+      type?: string;
+      categoryId?: string;
+      categoryName?: string;
+      images?: string[];
+    };
+
+    if (!title || !description) {
+      return res.status(400).json({ message: 'Название и описание обязательны' });
+    }
+
+    let resolvedCategoryId = categoryId;
+
+    if (!resolvedCategoryId && categoryName) {
+      const normalized = categoryName.trim();
+      if (normalized.length > 0) {
+        const category = await prisma.category.upsert({
+          where: { name: normalized },
+          create: { name: normalized },
+          update: {},
+          select: { id: true },
+        });
+
+        resolvedCategoryId = category.id;
+      }
+    }
+
+    if (!resolvedCategoryId) {
+      const fallback = await prisma.category.upsert({
+        where: { name: 'Общее' },
+        create: { name: 'Общее' },
+        update: {},
+        select: { id: true },
+      });
+      resolvedCategoryId = fallback.id;
+    }
+
+    const skill = await prisma.skill.create({
+      data: {
+        title: title.trim(),
+        description: description.trim(),
+        type: type === 'LEARN' ? 'LEARN' : 'TEACH',
+        categoryId: resolvedCategoryId,
+        userId,
+        images: Array.isArray(images) ? images.filter((v) => typeof v === 'string') : [],
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    return res.status(201).json(skill);
+  } catch (error) {
+    console.error('Create skill error:', error);
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 });
 
