@@ -56,6 +56,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             onComplete={() => {
               onRegistrationComplete();
               onClose();
+              window.location.href = '/profile';
             }}
             onClose={onClose}
           />

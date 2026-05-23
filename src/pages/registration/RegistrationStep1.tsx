@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const RegistrationStep1: React.FC<{ onContinue: (fullName: string, email: string, pass: string) => void | Promise<void>, onClose?: () => void }> = ({ onContinue, onClose }) => {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,8 +15,27 @@ export const RegistrationStep1: React.FC<{ onContinue: (fullName: string, email:
     }
   };
 
+  const handleBack = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
+
+    navigate(-1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+      <div className="fixed top-4 left-4 z-20">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="inline-flex items-center gap-2 bg-transparent px-0 py-0 text-sm font-semibold text-primary transition-colors hover:text-secondary focus:outline-none"
+        >
+          &larr; Назад
+        </button>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
           Создать аккаунт
@@ -65,7 +85,7 @@ export const RegistrationStep1: React.FC<{ onContinue: (fullName: string, email:
 
             <div className="flex items-center justify-between pt-4">
               <div className="text-sm">
-                <Link to="/auth/login" className="font-semibold text-primary hover:text-secondary">
+                <Link replace to="/auth/login" className="font-semibold text-primary hover:text-secondary">
                   Уже есть аккаунт?
                 </Link>
               </div>

@@ -11,15 +11,16 @@ import { TUser } from "../../api/types";
 import { genderOptions } from "../../shared/ui/input/input-dropdown/dropdownData";
 import { getImageUrl } from "../../shared/lib/helpers";
 import { Textarea } from "../../shared/ui/textarea/Textarea";
-import { useSelector } from "@store";
-import { getCurrentUser } from "../../services/user/user-slice";
+import { useDispatch, useSelector } from "@store";
+import { getCurrentUser, setCurrentUser } from "../../services/user/user-slice";
+import { updateMeApi, uploadAvatarApi } from "../../api/Api";
 
 type FormData = Pick<TUser, 'email' | 'name' | 'gender' | 'from' | 'about'> & {
   birthdate: Date | null; // у нас локально хранится Date
 };
 
 export const PersonalData = () => {
-
+  const dispatch = useDispatch();
   const currentUser = useSelector(getCurrentUser);
   if (!currentUser) return null;
 
@@ -33,6 +34,8 @@ export const PersonalData = () => {
   });
 
   const [avatar, setAvatar] = useState(getImageUrl(currentUser.photo));
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({
@@ -69,12 +72,43 @@ export const PersonalData = () => {
     const reader = new FileReader();
     reader.onload = (e) => setAvatar(e.target?.result as string);
     reader.readAsDataURL(file);
+    setAvatarFile(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Здесь будет логика сохранения данных
-    console.log("Данные для сохранения:", { ...formData, avatar });
+
+    if (isSaving) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      let avatarUrl: string | undefined;
+      if (avatarFile) {
+        const uploaded = await uploadAvatarApi(avatarFile);
+        avatarUrl = uploaded.avatarUrl;
+      }
+
+      const updatedUser = await updateMeApi({
+        email: formData.email,
+        fullName: formData.name,
+        gender: formData.gender,
+        birthdate: formData.birthdate ? formData.birthdate.toISOString() : undefined,
+        location: formData.from,
+        bio: formData.about,
+        ...(avatarUrl ? { avatarUrl } : {}),
+      });
+
+      dispatch(setCurrentUser(updatedUser));
+      alert("Профиль успешно сохранен");
+    } catch (error) {
+      console.error("Save profile error:", error);
+      alert("Не удалось сохранить профиль. Повторите попытку.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -149,8 +183,8 @@ export const PersonalData = () => {
             />
           </div>
 
-          <Button type="submit" colored className={styles.saveButton} disabled>
-            Сохранить
+          <Button type="submit" colored className={styles.saveButton} disabled={isSaving}>
+            {isSaving ? "Сохраняем..." : "Сохранить"}
           </Button>
         </form>
 
