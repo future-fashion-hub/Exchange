@@ -1,33 +1,70 @@
 .widget {
-  position: absolute;
-  left: 776px;
-  width: 556px;
-  background: white;
-  border: 1px solid #69735d;
-  border-radius: 12px;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(72vh, 760px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, #f8f9ff 0%, #f2f4ff 100%);
+  border: 1px solid #dce2f6;
+  border-radius: 20px;
+  box-shadow: 0 24px 48px rgba(34, 54, 112, 0.18);
   z-index: 1000;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  padding: 60px;
+  gap: 14px;
+  padding: 18px;
 }
 
-.header {
+.topRow {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  margin-bottom: 32px;
+  gap: 12px;
 }
 
 .title {
   margin: 0;
-  font-family: "Jost", sans-serif;
   font-size: 24px;
-  font-weight: 500;
-  color: #253017;
-  grid-column: 1;
+  font-weight: 700;
+  color: #1f275e;
+}
+
+.caption {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a83b3;
+  font-weight: 700;
+}
+
+.badge {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #1d5adb 0%, #5681f0 100%);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #3f4879;
 }
 
 .markAllButton {
@@ -35,18 +72,13 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  grid-column: 2;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2f65dc;
 }
 
-.markAllText {
-  font-family: "Roboto", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #508826;
-}
-
-.markAllButton:hover .markAllText {
-  text-decoration: none;
+.markAllButton:hover {
+  text-decoration: underline;
 }
 
 .clearButton {
@@ -54,88 +86,124 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  grid-column: 2;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2f65dc;
 }
 
-.clearText {
-  font-family: "Roboto", sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: #508826;
-}
-
-.clearButton:hover .clearText {
-  text-decoration: none;
+.clearButton:hover {
+  text-decoration: underline;
 }
 
 .notificationsSection {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding-bottom: 40px;
+  gap: 10px;
 }
 
 .viewedSection {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
 }
 
 .notificationCard {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  row-gap: 16px;
-  column-gap: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 14px;
+  border: 1px solid #dbe1f4;
+  background: #ffffff;
+  padding: 12px;
 }
 
 .iconContainer {
   display: flex;
-  align-items: flex-start;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #edf2ff;
+  color: #3956b9;
 }
 
 .contentSection {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 }
 
-.textSection {
-  grid-column: 1;
-}
-
 .timeSection {
-  grid-column: 2;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .notificationHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 5px;
   flex-wrap: wrap;
-  font-family: "Roboto", sans-serif;
-  font-size: 16px;
-  color: #253017;
+  font-size: 14px;
+  color: #293058;
+}
+
+.userName {
+  font-weight: 700;
+}
+
+.action {
+  color: #495284;
 }
 
 .time {
-  font-family: "Roboto", sans-serif;
-  font-size: 16px;
-  color: #69735d;
+  font-size: 12px;
+  color: #8b93bf;
   white-space: nowrap;
 }
 
 .details {
   margin: 0;
-  font-family: "Roboto", sans-serif;
   font-size: 12px;
-  color: #253017;
-  line-height: 16px;
+  color: #616c9f;
+  line-height: 1.45;
 }
 
 .buttonContainer {
-  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-start;
+}
+
+.viewed {
+  background: #f5f7ff;
+  border-color: #e4e8f8;
+}
+
+.loading,
+.emptyState {
+  border: 1px dashed #c7d0ef;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  color: #6b74a3;
+  font-size: 13px;
+  background: #f8f9ff;
+}
+
+@media (max-width: 640px) {
+  .widget {
+    width: calc(100vw - 20px);
+    border-radius: 14px;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
 }

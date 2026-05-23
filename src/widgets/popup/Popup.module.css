@@ -2,6 +2,11 @@
   position: absolute;
   top: 100%;
   z-index: 4;
+  margin-top: 8px;
+}
+
+.right {
+  right: 0;
 }
   
 .content {

@@ -1,6 +1,4 @@
-// src\widgets\notification-widget\NotificationWidget.tsx
-
-import { FC, useEffect } from "react";
+﻿import { FC, useEffect } from "react";
 import { useDispatch, useSelector } from "@store";
 import styles from "./NotificationWidget.module.css";
 import { Icon } from "../../shared/ui/icon/Icon";
@@ -11,45 +9,56 @@ import {
   getNewNotifications,
   getViewedNotifications,
   getIsLoading,
-  getUnseenCount
-} from "../../services/notifications/notification-slice"
-
+  getUnseenCount,
+} from "../../services/notifications/notification-slice";
 import { getNotificationThunk } from "../../services/notifications/actions";
 import { getCurrentUser } from "../../services/user/user-slice";
 import { NotificationTypes, TNotificationEvent } from "@api/types";
-import { getOffers } from "../../services/offers/offers-slice";
+import { connectSocket } from "../../shared/lib/socketClient";
+import { markAllNotificationsReadApi } from "@api/Api";
 
-// Интерфейс для преобразования данных (если нужно)
 interface NotificationDisplay {
-  id: number;
+  id: string;
   userName: string;
   action: string;
   details: string;
   time: string;
-  viewed: boolean;
 }
 
 export const NotificationWidget: FC = () => {
   const dispatch = useDispatch();
-  
-  // Это авторизованный пользователь
   const currentUser = useSelector(getCurrentUser);
-  if (currentUser === null) {
-    return (<div></div>)
+
+  if (!currentUser) {
+    return <div />;
   }
 
-  const currentUserId = currentUser.id
-  
+  const currentUserId = currentUser.id;
   const newNotifications = useSelector(getNewNotifications);
   const viewedNotifications = useSelector(getViewedNotifications);
   const isLoading = useSelector(getIsLoading);
   const unseenCount = useSelector(getUnseenCount);
-  const offers = useSelector(getOffers);
 
   useEffect(() => {
-    if (currentUserId) {
-      dispatch(getNotificationThunk({userId: currentUserId, offers}));
+    dispatch(getNotificationThunk({ userId: currentUserId }));
+  }, [currentUserId, dispatch]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
     }
+
+    const socket = connectSocket(token);
+    const handler = () => {
+      dispatch(getNotificationThunk({ userId: currentUserId }));
+    };
+
+    socket.on("notify:new", handler);
+
+    return () => {
+      socket.off("notify:new", handler);
+    };
   }, [currentUserId, dispatch]);
 
   const formatDate = (dateString: string): string => {
@@ -57,25 +66,26 @@ export const NotificationWidget: FC = () => {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (eventDate.toDateString() === today.toDateString()) {
       return "сегодня";
     }
-    
+
     if (eventDate.toDateString() === yesterday.toDateString()) {
       return "вчера";
     }
-    
+
     const day = eventDate.getDate();
     const months = [
-      'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+      "января", "февраля", "марта", "апреля", "мая", "июня",
+      "июля", "августа", "сентября", "октября", "ноября", "декабря",
     ];
     const month = months[eventDate.getMonth()];
     return `${day} ${month}`;
   };
 
   const handleMarkAllAsRead = () => {
+    void markAllNotificationsReadApi();
     dispatch(markAsSeen());
   };
 
@@ -83,30 +93,29 @@ export const NotificationWidget: FC = () => {
     dispatch(deleteAllNotification());
   };
 
-  // Функция для преобразования данных в формат виджета
   const mapToDisplayFormat = (event: TNotificationEvent): NotificationDisplay => {
     let action = "";
-    let details = "";
-    
-    if (event.type === NotificationTypes.OFFER_TO_ME) {
-      action = "предлагает вам обмен";
-      details = "Примите обмен, чтобы обсудить детали";
-    } else if (event.type === NotificationTypes.ACCEPT_MY_OFFER) {
-      action = "принял ваш обмен";
-      details = "Перейдите в профиль, чтобы обсудить детали";
-    }
-    else if (event.type === NotificationTypes.MY_NEW_OFFER) {
-      action = "пока не принял ваш обмен";
-      details = "Перейдите в профиль, чтобы обсудить детали";
+    const details = event.message;
+    const userName = event.anotherUserName || event.title;
+
+    if (event.type === NotificationTypes.ACCOUNT_ON_MODERATION) {
+      action = "ваш аккаунт отправлен на модерацию";
+    } else if (event.type === NotificationTypes.ACCOUNT_APPROVED) {
+      action = "ваш аккаунт подтвержден";
+    } else if (event.type === NotificationTypes.ACCOUNT_REJECTED) {
+      action = "ваш аккаунт отклонен";
+    } else if (event.type === NotificationTypes.CHAT_MESSAGE) {
+      action = event.title.toLowerCase().includes("обмен") ? event.title : "новое сообщение";
+    } else {
+      action = "новое уведомление";
     }
 
     return {
-      id: event.anotherUserId,
-      userName: event.anotherUserName,
+      id: event.id,
+      userName,
       action,
       details,
       time: formatDate(event.date),
-      viewed: event.seen === 1
     };
   };
 
@@ -123,27 +132,28 @@ export const NotificationWidget: FC = () => {
   return (
     <div className={styles.widget}>
       <div className={styles.content}>
-        {/* Заголовок с кнопкой "Прочитать все" */}
-        <div className={styles.header}>
-          <h2 className={styles.title}>
-            Новые уведомления {unseenCount > 0 && `(${unseenCount})`}
-          </h2>
+        <div className={styles.topRow}>
+          <div>
+            <p className={styles.caption}>Центр активности</p>
+            <h2 className={styles.title}>Уведомления</h2>
+          </div>
+          {unseenCount > 0 && <span className={styles.badge}>{unseenCount}</span>}
+        </div>
+
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>Новые</h3>
           {newNotifications.length > 0 && (
-            <button
-              className={styles.markAllButton}
-              onClick={handleMarkAllAsRead}
-            >
-              <span className={styles.markAllText}>Прочитать все</span>
+            <button className={styles.markAllButton} onClick={handleMarkAllAsRead}>
+              Прочитать все
             </button>
           )}
         </div>
 
-        {/* Новые уведомления */}
         <div className={styles.notificationsSection}>
           {newNotifications.length > 0 ? (
             newNotifications.map((notification) => (
               <NotificationCard
-                key={notification.anotherUserId}
+                key={notification.id}
                 notification={mapToDisplayFormat(notification)}
                 isNew={true}
               />
@@ -153,21 +163,19 @@ export const NotificationWidget: FC = () => {
           )}
         </div>
 
-
-        {/* Просмотренные уведомления */}
         {viewedNotifications.length > 0 && (
           <>
-            <div className={styles.header}>
-              <h2 className={styles.title}>Просмотренные</h2>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Просмотренные</h3>
               <button className={styles.clearButton} onClick={handleClearAll}>
-                <span className={styles.clearText}>Очистить</span>
+                Очистить
               </button>
             </div>
 
             <div className={styles.viewedSection}>
               {viewedNotifications.map((notification) => (
                 <NotificationCard
-                  key={notification.anotherUserId}
+                  key={notification.id}
                   notification={mapToDisplayFormat(notification)}
                   isNew={false}
                 />
@@ -180,15 +188,13 @@ export const NotificationWidget: FC = () => {
   );
 };
 
-// Компонент NotificationCard остается практически без изменений
-const NotificationCard: FC<{ 
+const NotificationCard: FC<{
   notification: NotificationDisplay;
   isNew: boolean;
-  onMarkAsRead?: () => void;
-}> = ({ notification, isNew, onMarkAsRead }) => (
+}> = ({ notification, isNew }) => (
   <div className={`${styles.notificationCard} ${isNew ? "" : styles.viewed}`}>
-    <div className={styles.iconContainer}>
-      <Icon name="idea" size={40} strokeWidth={1} />
+    <div className={styles.iconContainer} aria-hidden="true">
+      <Icon name="idea" size={22} strokeWidth={1.6} />
     </div>
 
     <div className={styles.contentSection}>
@@ -207,7 +213,7 @@ const NotificationCard: FC<{
 
     {isNew && (
       <div className={styles.buttonContainer}>
-        <Button size={114} colored onClick={onMarkAsRead}>
+        <Button size={118} className="bg-blue-600 text-white hover:bg-blue-700">
           Перейти
         </Button>
       </div>

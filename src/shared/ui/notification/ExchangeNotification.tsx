@@ -89,7 +89,7 @@ export const ExchangeNotification: React.FC<ExchangeNotificationProps> = ({
               onNavigateToExchange?.();
               onClose();
             }}
-            colored
+            className="bg-blue-600 text-white hover:bg-blue-700"
           >
             {buttonText || content.defaultButtonText}
           </Button>

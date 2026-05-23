@@ -2,14 +2,16 @@
 
 import { ReactNode, useEffect, useRef } from "react";
 import styles from './Popup.module.css';
+import clsx from 'clsx';
 
 type TPopupProps = {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  align?: 'left' | 'right';
 };
 
-export const Popup = ({ children, isOpen, onClose }:TPopupProps) => {
+export const Popup = ({ children, isOpen, onClose, align = 'left' }:TPopupProps) => {
   const popupRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export const Popup = ({ children, isOpen, onClose }:TPopupProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.popup_container} ref={popupRef}>
+    <div className={clsx(styles.popup_container, align === 'right' && styles.right)} ref={popupRef}>
       <div className={styles.content}>{children}</div>
     </div>
   )

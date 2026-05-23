@@ -1,25 +1,20 @@
-import { FC, useEffect, useState, useCallback, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Logo } from "../../shared/ui/logo/Logo";
-import { Button } from "../../shared/ui/button/Button";
+﻿import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { NotificationWidget } from "../notification-widget/NotificationWidget";
 import { Icon } from "../../shared/ui/icon/Icon";
 import { getImageUrl } from "../../shared/lib/helpers";
-import { SearchBar } from "../../shared/ui/search-bar/SearchBar";
 import { Popup } from "../popup/Popup";
 import { SkillMenu } from "../SkillMenu/SkillMenu";
-import { getCurrentUser, setUser } from "../../services/user/user-slice";
-import { ProfilePopup } from "../profile-popup/ProfilePopup";
-import { getPlainUsers } from "../../services/users/users-slice";
-import { useDispatch, useSelector } from "@store";
+import { getCurrentUser } from "../../services/user/user-slice";
+import { RootState, useDispatch, useSelector } from "@store";
 import { applySearchQuery } from "../../services/filters/actions";
-import { RootState } from "@store";
+import { logoutThunk } from "../../services/user/actions";
 import clsx from "clsx";
 import { RegistrationModal } from "../../features/registration/RegistrationModal";
+import { LuBell, LuMessageSquare } from "react-icons/lu";
 
 export const POPUP_TYPES = {
   SKILLS: "skills",
-  PROFILE: "profile",
   NOTIFICATIONS: "notifications",
 } as const;
 
@@ -27,25 +22,25 @@ export type PopupType = (typeof POPUP_TYPES)[keyof typeof POPUP_TYPES] | null;
 
 function useDebounced<T>(value: T, ms = 300) {
   const [v, setV] = useState(value);
+
   useEffect(() => {
     const t = setTimeout(() => setV(value), ms);
     return () => clearTimeout(t);
   }, [value, ms]);
+
   return v;
 }
 
-export const Header: FC<{ onOpenRegistration?: () => void }> = ({
-  onOpenRegistration,
-}) => {
+export const Header: FC<{ onOpenRegistration?: () => void }> = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const [isOpenPopup, setOpenPopup] = useState<PopupType>(null);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const closeModalRef = useRef(() => setIsRegistrationModalOpen(false));
 
   const currentUser = useSelector(getCurrentUser);
-  const plainUsers = useSelector(getPlainUsers);
-
   const currentQuery = useSelector((s: RootState) => s.filters.q);
   const [query, setQuery] = useState(currentQuery || "");
   const debounced = useDebounced(query, 300);
@@ -60,29 +55,26 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = ({
 
   const closePopup = () => setOpenPopup(null);
 
-  const handleLogin = () => {
-    if (plainUsers.length === 0) {
-      console.warn("Нет загруженных пользователей для входа");
-      return;
-    }
-    const randomIndex = Math.floor(Math.random() * plainUsers.length);
-    const randomUser = plainUsers[randomIndex];
-    dispatch(setUser(randomUser));
-  };
-
-  const handleRegistration = () => {
-    setIsRegistrationModalOpen(true);
-  };
-
   const handleRegistrationComplete = useCallback(() => {
     closeModalRef.current();
   }, []);
 
-  // For Nav links styling
-  const navLinkClass = (path: string) => clsx(
-    "text-sm font-medium transition-colors hover:text-primary",
-    location.pathname === path ? "text-primary border-b-2 border-primary pb-1" : "text-gray-600 dark:text-gray-300"
-  );
+  const handleLogout = useCallback(async () => {
+    try {
+      await dispatch(logoutThunk());
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  }, [dispatch, navigate]);
+
+  const navLinkClass = (path: string) =>
+    clsx(
+      "text-sm font-medium transition-colors hover:text-primary",
+      location.pathname === path
+        ? "text-primary border-b-2 border-primary pb-1"
+        : "text-gray-600 dark:text-gray-300",
+    );
 
   return (
     <header className="w-full flex justify-between items-center px-4 md:px-8 py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 z-50 sticky top-0">
@@ -92,6 +84,7 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = ({
             <span className="text-primary italic mr-1">Exchange</span>
           </div>
         </Link>
+
         <nav className="hidden md:block">
           <ul className="flex items-center gap-6">
             <li>
@@ -100,11 +93,11 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = ({
               </Link>
             </li>
             {currentUser && (
-               <li>
-                 <Link to="/requests" className={navLinkClass("/requests")}>
-                   Мои запросы
-                 </Link>
-               </li>
+              <li>
+                <Link to="/profile/exchanges" className={navLinkClass("/profile/exchanges")}>
+                  Мои обмены
+                </Link>
+              </li>
             )}
             <li>
               <Link to="/about" className={navLinkClass("/about")}>
@@ -133,65 +126,78 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = ({
       <div className="flex items-center gap-4">
         {currentUser ? (
           <>
-            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
-              <Icon name="moon" size="s" />
-            </button>
-            <button
-              className="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
-              onClick={() => togglePopup(POPUP_TYPES.NOTIFICATIONS)}
+            <Link
+              to="/profile/chat"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors"
+              aria-label="Открыть чат"
             >
-              <Icon name="notification" size={20} />
-            </button>
-            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
-              <Icon name="like" size="s" />
-            </button>
-            <div
-              className="flex items-center gap-3 cursor-pointer ml-2"
-              onClick={() => togglePopup(POPUP_TYPES.PROFILE)}
-            >
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden lg:block">{currentUser.name}</span>
+              <LuMessageSquare size={18} aria-hidden="true" />
+            </Link>
+
+            <div className="relative" onMouseDown={(e) => e.stopPropagation()}>
+              <button
+                className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-700 hover:text-primary dark:text-gray-300 dark:hover:text-white transition-colors"
+                onClick={() => togglePopup(POPUP_TYPES.NOTIFICATIONS)}
+                aria-label="Открыть уведомления"
+              >
+                <LuBell size={18} aria-hidden="true" />
+                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
+              </button>
+
+              <Popup
+                isOpen={isOpenPopup === POPUP_TYPES.NOTIFICATIONS}
+                onClose={closePopup}
+                align="right"
+              >
+                <NotificationWidget />
+              </Popup>
+            </div>
+
+            <Link to="/profile" className="flex items-center gap-3 cursor-pointer ml-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden lg:block">
+                {currentUser.name}
+              </span>
               <img
                 src={getImageUrl(currentUser.photo)}
                 alt={currentUser.name}
                 className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700"
               />
-            </div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm font-semibold text-gray-700 hover:text-primary dark:text-gray-200 transition-colors ml-2"
+            >
+              Выйти
+            </button>
           </>
         ) : (
           <div className="flex items-center gap-4">
-            <button 
-              onClick={handleLogin} 
+            <Link
+              replace
+              to="/auth/login"
               className="text-sm font-semibold text-gray-700 hover:text-primary dark:text-gray-200 transition-colors"
             >
               Войти
-            </button>
-            <Link 
+            </Link>
+            <Link
               to="/registration/step1"
               className="bg-primary hover:bg-secondary text-white text-sm font-semibold py-2 px-5 rounded-full shadow-md transition-colors"
             >
-               Регистрация
+              Регистрация
             </Link>
           </div>
         )}
       </div>
 
-      {currentUser ? (
-        <Popup isOpen={isOpenPopup === POPUP_TYPES.NOTIFICATIONS} onClose={closePopup}>
-          <NotificationWidget />
-        </Popup>
-      ) : null}
-
       <Popup isOpen={isOpenPopup === POPUP_TYPES.SKILLS} onClose={closePopup}>
         <SkillMenu />
       </Popup>
 
-      <Popup isOpen={isOpenPopup === POPUP_TYPES.PROFILE} onClose={closePopup}>
-        <ProfilePopup onClose={closePopup} />
-      </Popup>
-
       <RegistrationModal
         isOpen={isRegistrationModalOpen}
-        onClose={closeModalRef.current} 
+        onClose={closeModalRef.current}
         onRegistrationComplete={handleRegistrationComplete}
       />
     </header>

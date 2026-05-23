@@ -5,7 +5,6 @@ import { TNotificationEvent } from '@api/types';
 import { getNotificationsApi } from '@api/Api';
 import { useSelector } from '@store';
 import { getCurrentUser } from '../../services/user/user-slice';
-import { getOffers } from '../../services/offers/offers-slice';
 
 export const NotificationsTable = () => {
   const [events, setEvents] = useState<TNotificationEvent[]>([]);
@@ -13,7 +12,6 @@ export const NotificationsTable = () => {
 
   // Это авторизованный пользователь
   const currentUser = useSelector(getCurrentUser);
-  const offers = useSelector(getOffers);
 
   useEffect(() => {
     if (!currentUser) {
@@ -23,7 +21,7 @@ export const NotificationsTable = () => {
     }
 
     setLoading(true);
-    getNotificationsApi(currentUser.id, offers)
+    getNotificationsApi()
       .then((res) => setEvents(res.events))
       .finally(() => setLoading(false));
   }, [currentUser]);
@@ -43,7 +41,8 @@ export const NotificationsTable = () => {
       <thead>
         <tr>
           <th>Тип</th>
-          <th colSpan={2}>От кого</th>
+          <th>Заголовок</th>
+          <th>Текст</th>
           <th>Я Видел</th>
           <th>Дата</th>
         </tr>
@@ -52,8 +51,8 @@ export const NotificationsTable = () => {
         {events.map((event, i) => (
           <tr key={i}>
             <td>{event.type}</td>
-            <td>{event.anotherUserId}</td>
-            <td>{event.anotherUserName}</td>
+            <td>{event.title}</td>
+            <td>{event.message}</td>
             <td>{event.seen ? 'Да' : 'Нет'}</td>
             <td>{event.date}</td>
           </tr>

@@ -76,8 +76,7 @@ export const LoginNotification: React.FC<LoginNotificationProps> = ({
             </Button>
             <Button
               onClick={handleLogin}
-              colored
-              className={styles.loginButton}
+              className={`bg-blue-600 text-white hover:bg-blue-700 ${styles.loginButton}`}
             >
               Войти
             </Button>
