@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { getNotificationThunk } from "./actions";
 
 interface notificationState {
-  userID: number | null;
+  userID: string | number | null;
   events: TNotificationEvent[];
   error: string | null;
   isLoading: boolean; 
