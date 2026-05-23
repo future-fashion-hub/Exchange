@@ -1,7 +1,7 @@
 // src/app/App.tsx
 
 import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import {
   DropdownDemo,
@@ -48,6 +48,7 @@ import { getCreatedAtUsersThunk } from "../services/createdAtUsers/actions";
 import { getRandomUsersThunk } from "../services/randomUsers/actions";
 
 import { About } from "../pages/about/About";
+import { MyExchangesPage } from "../pages/exchanges/MyExchangesPage";
 // import { getFilteredUsersThunk } from "../services/filteredUsers/actions";
 // no need to import GENDERS or TGender
 import { getOffersThunk } from "../services/offers/actions";
@@ -55,7 +56,8 @@ import { getOffers } from "../services/offers/offers-slice";
 import { getUsersThunk } from "../services/users/actions";
 
 import { HeaderWithModal } from '../widgets/header/HeaderWithModal';
-import { registerApi } from "../api/Api";
+import { getMeApi, loginApi, registerApi } from "../api/Api";
+import { setCurrentUser } from "../services/user/user-slice";
 
 import styles from "./App.module.css";
 
@@ -83,6 +85,22 @@ export const App: React.FC = () => {
 
   const currentUser = useSelector((s: RootState) => s.user.user);
   const offers = useSelector(getOffers);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token || currentUser) {
+      return;
+    }
+
+    void getMeApi()
+      .then((me) => {
+        dispatch(setCurrentUser(me));
+      })
+      .catch((error) => {
+        console.error('Auth restore error:', error);
+        localStorage.removeItem('token');
+      });
+  }, [dispatch, currentUser]);
 
   // лайки грузятся при смене пользователя
   React.useEffect(() => {
@@ -123,19 +141,26 @@ export const App: React.FC = () => {
           element={
             <RegistrationStep3Merged
               onBack={() => (window.location.href = "/registration/step2")}
-              onComplete={() => {
+              onComplete={async () => {
                 console.log("Step 3 data completed!");
-                window.location.href = "/";
+                try {
+                  const me = await getMeApi();
+                  dispatch(setCurrentUser(me));
+                } catch (error) {
+                  console.error('Post-registration /me fetch error:', error);
+                }
+                window.location.href = "/profile";
               }}
             />
           }
         />
+        <Route path="admin" element={<AdminDashboard />} />
+        <Route path="auth/login" element={<LoginContent />} />
 
         <Route element={<Layout />}>
           {/*То, что есть*/}
           <Route index element={<HomePage />} />
           <Route path="skills" element={<CatalogContent />} />
-          <Route path="auth/login" element={<LoginContent />} />
           <Route path="auth/register" element={<RegisterContent />} />
           <Route path="skill/new" element={<SkillFormContent />} />
           <Route path="skills/:id" element={<OfferPage />} />
@@ -144,7 +169,7 @@ export const App: React.FC = () => {
 
           {/*заглушки*/}
           <Route path="favorites" element={<FavoritesPageStub />} />
-          <Route path="requests" element={<RequestsPageStub />} />
+          <Route path="requests" element={<MyExchangesPage />} />
 
           {/* ПРОФИЛЬ */}
           <Route path="profile">
@@ -152,13 +177,11 @@ export const App: React.FC = () => {
             <Route path="chat" element={<ChatPage />} />
             {/* Все подразделы профиля ведут на 404 */}
             <Route path="notifications" element={<NotFoundPage />} />
-            <Route path="requests" element={<NotFoundPage />} />
-            <Route path="exchanges" element={<NotFoundPage />} />
+            <Route path="requests" element={<MyExchangesPage />} />
+            <Route path="exchanges" element={<MyExchangesPage />} />
             <Route path="favorites" element={<NotFoundPage />} />
             <Route path="skills" element={<NotFoundPage />} />
           </Route>
-
-          <Route path="admin" element={<AdminDashboard />} />
 
           {/* Системные */}
           <Route path="500" element={<ServerErrorPage />} />
@@ -188,6 +211,8 @@ const Layout: React.FC = () => {
 //Каталог (FilterSection + GridList)
 const CatalogContent: React.FC = () => {
   const users = useSelector((s: RootState) => s.users.users);
+  const currentUser = useSelector((s: RootState) => s.user.user);
+  const isGuest = !currentUser;
 
   const [selectedPlaces, setSelectedPlaces] = React.useState<string[]>([]);
 
@@ -195,22 +220,26 @@ const CatalogContent: React.FC = () => {
     <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Sidebar */}
-        <aside className="w-full md:w-1/4 flex-shrink-0 sticky top-24">
-          <FilterSection
-            onPlacesChange={setSelectedPlaces}
-            selectedPlaces={selectedPlaces}
-          />
-        </aside>
+        {!isGuest && (
+          <aside className="w-full md:w-1/4 flex-shrink-0 sticky top-24">
+            <FilterSection
+              onPlacesChange={setSelectedPlaces}
+              selectedPlaces={selectedPlaces}
+            />
+          </aside>
+        )}
 
         
         {/* Main Grid Content */}
-        <main className="w-full md:w-3/4 flex-grow">
+        <main className={isGuest ? "w-full flex-grow" : "w-full md:w-3/4 flex-grow"}>
           <GridList
             users={users}
             // subCategories={subCategories}
             loading={false}
             hasMore={false}
             onLoadMore={() => {}}
+            showSort={!isGuest}
+            showPagination={!isGuest}
           />
         </main>
       </div>
@@ -219,18 +248,32 @@ const CatalogContent: React.FC = () => {
 };
 
 //Логин — AuthForm
-const LoginContent: React.FC = () => (
-  <section className="page page-auth">
-    <AuthForm
-      onContinue={(email, password) => {
-        console.log("Email:", email, "Password:", password);
-      }}
-    />
-  </section>
-);
+const LoginContent: React.FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  return (
+    <section className="page page-auth">
+      <AuthForm
+        onContinue={async (email, password) => {
+          try {
+            await loginApi({ email, password });
+            const me = await getMeApi();
+            dispatch(setCurrentUser(me));
+            navigate(me.role === 'ADMIN' ? '/admin' : '/profile');
+          } catch (error) {
+            console.error('Login error:', error);
+            alert('Не удалось войти. Проверьте email и пароль.');
+          }
+        }}
+      />
+    </section>
+  );
+};
 
 // Регистрация
 const RegisterContent: React.FC = () => {
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const [step1Data, setStep1Data] = useState({ fullName: "", email: "", password: "" });
 
@@ -265,9 +308,15 @@ const RegisterContent: React.FC = () => {
       {step === 3 && (
         <RegistrationStep3Merged
           onBack={handleBack}
-          onComplete={() => {
+          onComplete={async () => {
             console.log("Registration complete!!");
-            window.location.href = "/";
+            try {
+              const me = await getMeApi();
+              dispatch(setCurrentUser(me));
+            } catch (error) {
+              console.error('Post-registration /me fetch error:', error);
+            }
+            window.location.href = "/profile";
           }}
         />
       )}
@@ -276,14 +325,18 @@ const RegisterContent: React.FC = () => {
 };
 
 //Форма навыка
-const SkillFormContent: React.FC = () => (
-  <section className="page page-skillform">
-    <SkillForm
-      onBack={() => console.log("Back")}
-      onContinue={() => console.log("Continue")}
-    />
-  </section>
-);
+const SkillFormContent: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <section className="page page-skillform">
+      <SkillForm
+        onBack={() => navigate(-1)}
+        onContinue={() => navigate('/skills')}
+      />
+    </section>
+  );
+};
 
 //Демо: дропдауны
 const DropdownsDemoContent: React.FC = () => (

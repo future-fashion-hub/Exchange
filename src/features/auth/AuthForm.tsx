@@ -1,12 +1,12 @@
-import { FC } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { FC, useState } from "react";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { LuArrowRight, LuEye, LuEyeOff, LuMail, LuStar } from "react-icons/lu";
 import styles from "./AuthForm.module.css";
-import { Button } from "../../shared/ui/button/Button";
-import { Input, INPUT_STATUS } from "../../shared/ui/input/Input";
-import { SocialButton } from "../../shared/ui/social-button/SocialButton";
 
 type AuthFormProps = {
-  onContinue: (email: string, password: string) => void;
+  onContinue: (email: string, password: string) => void | Promise<void>;
 };
 
 type FormData = {
@@ -15,8 +15,12 @@ type FormData = {
 };
 
 export const AuthForm: FC<AuthFormProps> = ({ onContinue }) => {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const navigate = useNavigate();
+
   const {
-    control,
+    register,
+    watch,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm<FormData>({
@@ -28,118 +32,112 @@ export const AuthForm: FC<AuthFormProps> = ({ onContinue }) => {
     onContinue(data.email, data.password);
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google login clicked");
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/');
   };
 
-  const handleAppleLogin = () => {
-    console.log("Apple login clicked");
-  };
-
-  const isPasswordStrong = (password: string): boolean => {
-    if (!password) return false;
-
-    return (
-      password.length >= 8 &&
-      /\d/.test(password) &&
-      /[a-zA-Zа-яА-Я]/.test(password) &&
-      /[A-ZА-Я]/.test(password)
-    );
-  };
+  const password = watch("password");
+  const emailValue = watch("email")?.trim().toLowerCase() || "";
+  const isAdminEmail = emailValue === "admin@mail.ru";
 
   return (
-    <div className={styles.authForm}>
-      <div className={styles.content}>
-        {/* Кнопки соц сетей */}
-        <SocialButton provider="google" onClick={handleGoogleLogin}>
-          Продолжить с Google
-        </SocialButton>
+    <section className={styles.authScreen}>
+      <div className={styles.backButtonWrap}>
+        <button type="button" onClick={handleBack} className={styles.backButton}>
+          &larr; Назад
+        </button>
+      </div>
 
-        <SocialButton provider="apple" onClick={handleAppleLogin}>
-          Продолжить с Apple
-        </SocialButton>
+      <div className={styles.brandIcon} aria-hidden="true">
+        <LuStar size={32} />
+      </div>
+      <h1 className={styles.title}>Exchange</h1>
 
-        {/* Разделитель */}
-        <div className={styles.separator}>
-          <span>или</span>
-        </div>
-
-        {/* Форма */}
+      <div className={styles.card}>
         <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-          {/* Email */}
-          <Controller
-            name="email"
-            control={control}
-            rules={{
-              required: "Email обязателен",
-              pattern: {
-                value: /^\S+@\S+\.\S+$/,
-                message: "Введите корректный email",
-              },
-            }}
-            render={({ field }) => (
-              <Input
-                type="email"
-                label="Email"
+          <div className={styles.fieldGroup}>
+            <label htmlFor="email" className={styles.label}>
+              Электронная почта
+            </label>
+            <div className={styles.inputWrap}>
+              <input
                 id="email"
-                placeholder="Введите email"
-                {...field}
-                status={
-                  errors.email ? INPUT_STATUS.ERROR : INPUT_STATUS.DEFAULT
-                }
-                errorMessage={errors.email?.message}
+                type="email"
+                placeholder="vash@email.com"
+                className={styles.input}
+                {...register("email", {
+                  required: "Email обязателен",
+                  pattern: {
+                    value: /^\S+@\S+\.\S+$/,
+                    message: "Введите корректный email",
+                  },
+                })}
               />
-            )}
-          />
+              <LuMail className={styles.trailingIcon} aria-hidden="true" />
+            </div>
+            {errors.email ? (
+              <p className={styles.errorText}>{errors.email.message}</p>
+            ) : null}
+          </div>
 
-          {/* Пароль */}
-          <Controller
-            name="password"
-            control={control}
-            rules={{
-              required: "Пароль обязателен",
-              validate: {
-                minLength: (v) =>
-                  v.length >= 8 || "Пароль должен быть не менее 8 символов",
-                hasNumber: (v) =>
-                  /\d/.test(v) || "Пароль должен содержать хотя бы одну цифру",
-                hasLetter: (v) =>
-                  /[a-zA-Zа-яА-Я]/.test(v) ||
-                  "Пароль должен содержать хотя бы одну букву",
-                hasCapitalLetter: (v) =>
-                  /[A-ZА-Я]/.test(v) ||
-                  "Пароль должен содержать хотя бы одну заглавную букву",
-              },
-            }}
-            render={({ field }) => {
-              const isStrong = isPasswordStrong(field.value);
-              const status = errors.password
-                ? INPUT_STATUS.ERROR
-                : isStrong
-                ? INPUT_STATUS.SUCCESS
-                : INPUT_STATUS.DEFAULT;
+          <div className={styles.fieldGroup}>
+            <label htmlFor="password" className={styles.label}>
+              Пароль
+            </label>
 
-              return (
-                <Input
-                  type="password"
-                  label="Пароль"
-                  id="password"
-                  placeholder="Придумайте надёжный пароль"
-                  showPasswordToggle
-                  {...field}
-                  status={status}
-                  errorMessage={errors.password?.message}
-                  successMessage={isStrong ? "Надёжный" : undefined}
-                />
-              );
-            }}
-          />
+            <div className={styles.inputWrap}>
+              <input
+                id="password"
+                type={isPasswordVisible ? "text" : "password"}
+                placeholder="••••••••"
+                className={styles.input}
+                {...register("password", {
+                  required: "Пароль обязателен",
+                  minLength: {
+                    value: 4,
+                    message: "Пароль должен быть не менее 4 символов",
+                  },
+                })}
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setIsPasswordVisible((prev) => !prev)}
+                aria-label={isPasswordVisible ? "Скрыть пароль" : "Показать пароль"}
+              >
+                {isPasswordVisible ? (
+                  <LuEyeOff className={styles.toggleIcon} aria-hidden="true" />
+                ) : (
+                  <LuEye className={styles.toggleIcon} aria-hidden="true" />
+                )}
+              </button>
+            </div>
+            {errors.password ? (
+              <p className={styles.errorText}>{errors.password.message}</p>
+            ) : null}
+            {!errors.password && password?.length > 0 && password.length < 4 ? (
+              <p className={styles.errorText}>Пароль должен быть не менее 4 символов</p>
+            ) : null}
+          </div>
 
-          <Button colored type="submit" disabled={!isValid}>
-            Далее
-          </Button>
+          <button className={styles.submitButton} type="submit" disabled={!isValid}>
+            Войти <LuArrowRight aria-hidden="true" />
+          </button>
         </form>
       </div>
-    </div>
+
+      <p className={styles.registerLine}>
+        {isAdminEmail ? (
+          <>Для администратора доступен только вход в существующий аккаунт.</>
+        ) : (
+          <>Нет аккаунта? <Link to="/registration/step1">Зарегистрироваться</Link></>
+        )}
+      </p>
+    </section>
   );
 };
