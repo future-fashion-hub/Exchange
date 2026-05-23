@@ -3,20 +3,27 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../prisma';
 import { AuthRequest, authenticateToken } from '../middleware/auth';
+import { createNotification } from '../services/notifications';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@mail.ru').trim().toLowerCase();
 
 // POST /api/auth/register
 router.post('/register', async (req: Request, res: Response): Promise<any> => {
   try {
     const { email, password, fullName } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
     if (!email || !password || !fullName) {
       return res.status(400).json({ message: 'Все поля обязательны' });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (normalizedEmail === ADMIN_EMAIL) {
+      return res.status(403).json({ message: 'Регистрация администратора запрещена' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
     }
@@ -26,10 +33,18 @@ router.post('/register', async (req: Request, res: Response): Promise<any> => {
 
     const newUser = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         passwordHash,
         fullName,
+        moderationStatus: 'PENDING',
       },
+    });
+
+    await createNotification({
+      userId: newUser.id,
+      type: 'ACCOUNT_ON_MODERATION',
+      title: 'Аккаунт отправлен на модерацию',
+      message: 'Ваша карточка отправлена модератору и станет доступна в каталоге после подтверждения.',
     });
 
     const token = jwt.sign(
@@ -49,8 +64,9 @@ router.post('/register', async (req: Request, res: Response): Promise<any> => {
 router.post('/login', async (req: Request, res: Response): Promise<any> => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
       return res.status(401).json({ message: 'Неверные учетные данные' });
     }
@@ -87,9 +103,13 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response): Pr
         id: true,
         email: true,
         role: true,
+        moderationStatus: true,
         fullName: true,
+        gender: true,
+        birthdate: true,
         bio: true,
         avatarUrl: true,
+        cardImageUrl: true,
         offerTags: true,
         seekTags: true,
         isPrivate: true,
