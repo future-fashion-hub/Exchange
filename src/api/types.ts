@@ -11,9 +11,14 @@ export const GENDERS = {
 
 export type TGender = (typeof GENDERS)[keyof typeof GENDERS];
 
+export type TRole = 'GUEST' | 'USER' | 'ADMIN';
+export type TModerationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
 export type TUser = {
   id: string | number;
   name: string;
+  role?: TRole;
+  moderationStatus?: TModerationStatus;
   gender: TGender;
   photo: string; //Фото профиля
   from: string; //Город пользователя
@@ -31,6 +36,21 @@ export type TUser = {
   about: string; //Описание пользователя (вводится при регистрации)
   likedByMe: boolean;
   random: number;
+  offerTags?: string[];
+  seekTags?: string[];
+  skills?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    type: 'TEACH' | 'LEARN';
+    categoryName: string;
+  }>;
+  stats?: {
+    activeExchanges: number;
+    totalSkills: number;
+    reputation: number;
+    notifications: number;
+  };
 };
 
 export type TGetFilteredUsersArgs = {
@@ -83,23 +103,27 @@ export type TResponseSubcategories = {
 }
 
 export const NotificationTypes = {
-  MY_NEW_OFFER: 'my_new_offer',
-  OFFER_TO_ME: 'offer_to_me',
-  ACCEPT_MY_OFFER: 'accept_my_offer',
+  ACCOUNT_ON_MODERATION: 'ACCOUNT_ON_MODERATION',
+  ACCOUNT_APPROVED: 'ACCOUNT_APPROVED',
+  ACCOUNT_REJECTED: 'ACCOUNT_REJECTED',
+  CHAT_MESSAGE: 'CHAT_MESSAGE',
 } as const;
 
 export type TNotificationType = typeof NotificationTypes[keyof typeof NotificationTypes];
 
 export type TNotificationEvent = {
+  id: string;
   type: TNotificationType;
   seen: 0 | 1;
-  anotherUserId: number;
-  anotherUserName: string;
+  title: string;
+  message: string;
   date: string; // ISO-строка с датой
+  anotherUserId?: number;
+  anotherUserName?: string;
 };
 
 export type TResponseNotifications = {
-  userId: number;
+  userId: string | number;
   events: TNotificationEvent[];
 };  
 
@@ -123,3 +147,30 @@ export type TOffer = {
 export type TResponseOffers = {
   offers: TOffer[];
 }
+
+export type TExchangeStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
+
+export type TExchangePeer = {
+  id: string;
+  fullName: string;
+  email: string;
+  avatarUrl: string | null;
+  cardImageUrl: string | null;
+};
+
+export type TExchange = {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  status: TExchangeStatus;
+  createdAt: string;
+  updatedAt: string;
+  direction: 'incoming' | 'outgoing';
+  peer: TExchangePeer;
+};
+
+export type TMyExchangesResponse = {
+  incoming: TExchange[];
+  outgoing: TExchange[];
+  accepted: TExchange[];
+};
