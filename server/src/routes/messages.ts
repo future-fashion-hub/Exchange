@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import prisma from "../prisma";
 import { AuthRequest, authenticateToken } from "../middleware/auth";
 import { getIo } from "../socket";
+import { createNotification } from "../services/notifications";
 
 const router = Router();
 
@@ -58,11 +59,12 @@ router.post("/", authenticateToken, async (req: AuthRequest, res: Response): Pro
 
     const io = getIo();
     io.to(`user:${receiverId}`).emit("chat:new_message", message);
-    io.to(`user:${receiverId}`).emit("notify:new", {
-      type: "chat",
-      senderId,
-      text,
-      createdAt: message.createdAt,
+
+    await createNotification({
+      userId: receiverId,
+      type: "CHAT_MESSAGE",
+      title: "Новое сообщение",
+      message: text,
     });
 
     return res.status(201).json(message);
