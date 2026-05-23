@@ -7,9 +7,13 @@ import cors from 'cors';
 import authRoutes from './routes/auth';
 import skillsRoutes from './routes/skills';
 import usersRoutes from './routes/users';
+import offersRoutes from './routes/offers';
 import messagesRoutes from './routes/messages';
 import uploadRoutes from './routes/upload';
+import adminRoutes from './routes/admin';
+import notificationsRoutes from './routes/notifications';
 import { initSocket } from './socket';
+import { ensureAdminUser } from './bootstrapAdmin';
 
 const app = express();
 const server = http.createServer(app);
@@ -32,8 +36,11 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/skills', skillsRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/offers', offersRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Заглушка для неизвестных маршрутов
 app.use((req, res) => {
@@ -48,6 +55,12 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 initSocket(server);
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+void ensureAdminUser()
+  .catch((error) => {
+    console.error('Admin bootstrap error:', error);
+  })
+  .finally(() => {
+    server.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  });
