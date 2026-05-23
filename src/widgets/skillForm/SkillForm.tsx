@@ -5,8 +5,10 @@ import { Textarea } from "../../shared/ui/textarea/Textarea";
 import { Button } from "../../shared/ui/button/Button";
 import { DragDrop } from "../../shared/ui/dragdrop/DragDrop";
 import {
+  createSkillApi,
   getSkillsCategoriesApi,
   getSkillsSubCategoriesApi,
+  uploadSkillImageApi,
 } from "../../api/Api";
 import { TCategory, TSubcategory } from "../../api/types";
 import styles from "./SkillForm.module.css";
@@ -27,6 +29,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({ onBack, onContinue }) => {
     TSubcategory[]
   >([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Загрузка категорий и подкатегорий
   useEffect(() => {
@@ -105,10 +108,38 @@ export const SkillForm: React.FC<SkillFormProps> = ({ onBack, onContinue }) => {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isFormValid()) {
+    if (!isFormValid() || isSaving) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        const uploaded = await uploadSkillImageApi(imageFile);
+        imageUrl = uploaded.imageUrl;
+      }
+
+      const categoryName = categories.find((category) => category.id.toString() === selectedCategory)?.name;
+
+      await createSkillApi({
+        title: skillName.trim(),
+        description: description.trim(),
+        type: "TEACH",
+        categoryId: selectedCategory || undefined,
+        categoryName,
+        images: imageUrl ? [imageUrl] : [],
+      });
+
       onContinue();
+    } catch (error) {
+      console.error("Ошибка сохранения навыка:", error);
+      alert("Не удалось сохранить навык. Повторите попытку.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -181,8 +212,8 @@ export const SkillForm: React.FC<SkillFormProps> = ({ onBack, onContinue }) => {
           <Button type="button" onClick={onBack} className={styles.backButton}>
             Назад
           </Button>
-          <Button colored type="submit" disabled={!isFormValid()}>
-            Продолжить
+          <Button colored type="submit" disabled={!isFormValid() || isSaving}>
+            {isSaving ? "Сохраняем..." : "Продолжить"}
           </Button>
         </div>
       </form>

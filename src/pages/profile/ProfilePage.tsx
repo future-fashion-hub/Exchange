@@ -4,10 +4,35 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../services/store';
 
 export const ProfilePage: React.FC = () => {
-  // In reality, this data would come from the backend via RTK/Axios
-  // We use placeholder data for the redesigned layout based on the mockup.
   const authUser = useSelector((state: RootState) => state.user.user);
   const userName = authUser?.name || 'Алекс';
+
+  const stats = {
+    activeExchanges: authUser?.stats?.activeExchanges ?? 0,
+    totalSkills: authUser?.stats?.totalSkills ?? 0,
+    reputation: authUser?.stats?.reputation ?? 0,
+    notifications: authUser?.stats?.notifications ?? 0,
+  };
+
+  const profileSkills =
+    (authUser?.skills && authUser.skills.length > 0
+      ? authUser.skills.map((skill) => ({
+          id: skill.id,
+          title: skill.title,
+          subtitle: `${skill.type === 'TEACH' ? 'Преподаю' : 'Изучаю'} • ${skill.categoryName}`,
+        }))
+      : [
+          ...(authUser?.offerTags || []).map((tag, index) => ({
+            id: `offer-${index}-${tag}`,
+            title: tag,
+            subtitle: 'Преподаю',
+          })),
+          ...(authUser?.seekTags || []).map((tag, index) => ({
+            id: `seek-${index}-${tag}`,
+            title: tag,
+            subtitle: 'Изучаю',
+          })),
+        ]).slice(0, 8);
 
   return (
     <div className="min-h-screen bg-[#F9FAF7] dark:bg-gray-900 font-sans p-4 md:p-8">
@@ -18,7 +43,9 @@ export const ProfilePage: React.FC = () => {
           <div className="relative z-10 max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Привет, {userName}!</h1>
             <p className="text-lg md:text-xl text-blue-100 mb-8">
-              Готовы расширить свои творческие горизонты сегодня? У вас есть 3 новых запроса на обмен, ожидающих вашего рассмотрения.
+              {stats.notifications > 0
+                ? `У вас ${stats.notifications} новых уведомлений. Проверьте входящие, чтобы не пропустить важные обмены.`
+                : 'Добро пожаловать! Пока новых уведомлений нет, но можно начать первый обмен уже сейчас.'}
             </p>
             <div className="flex gap-4">
               <button className="bg-white text-primary px-6 py-3 rounded-full font-bold shadow-md hover:bg-gray-50 transition-colors">
@@ -35,10 +62,10 @@ export const ProfilePage: React.FC = () => {
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {[
-            { label: 'АКТИВНЫЕ ОБМЕНЫ', value: '12', icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', color: 'text-blue-500', bg: 'bg-blue-50' },
-            { label: 'ВСЕГО НАВЫКОВ', value: '48', icon: 'M12 14l9-5-9-5-9 5 9 5z', color: 'text-purple-500', bg: 'bg-purple-50' },
-            { label: 'РЕПУТАЦИЯ', value: '4.9k', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-green-500', bg: 'bg-green-50' },
-            { label: 'УВЕДОМЛЕНИЯ', value: '07', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', color: 'text-red-500', bg: 'bg-red-50' }
+            { label: 'АКТИВНЫЕ ОБМЕНЫ', value: String(stats.activeExchanges), icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', color: 'text-blue-500', bg: 'bg-blue-50' },
+            { label: 'ВСЕГО НАВЫКОВ', value: String(stats.totalSkills), icon: 'M12 14l9-5-9-5-9 5 9 5z', color: 'text-purple-500', bg: 'bg-purple-50' },
+            { label: 'РЕПУТАЦИЯ', value: Number.isFinite(stats.reputation) ? stats.reputation.toFixed(1) : '0.0', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-green-500', bg: 'bg-green-50' },
+            { label: 'УВЕДОМЛЕНИЯ', value: String(stats.notifications), icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', color: 'text-red-500', bg: 'bg-red-50' }
           ].map((stat, i) => (
             <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
               <div className={`${stat.bg} ${stat.color} p-3 rounded-xl hidden sm:block`}>
@@ -64,33 +91,16 @@ export const ProfilePage: React.FC = () => {
                 <h2 className="text-2xl font-bold dark:text-white">Текущие обмены</h2>
                 <Link to="/profile/exchanges" className="text-primary font-semibold hover:underline">Смотреть все</Link>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { name: 'Елена Родригес', role: 'Эксперт-копирайтер', teach: 'Основы UI дизайна', learn: 'Креативный нарратив', status: 'В процессе', sColor: 'bg-purple-100 text-purple-700' },
-                  { name: 'Джулиан Чен', role: 'SEO Стратег', teach: 'Figma Advanced', learn: 'Ключевые слова', status: 'Запланировано', sColor: 'bg-green-100 text-green-700' }
-                ].map((exch, i) => (
-                  <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                          <span className="text-gray-500 font-bold">{exch.name[0]}</span>
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900 dark:text-white">{exch.name}</p>
-                          <p className="text-xs text-gray-500">{exch.role}</p>
-                        </div>
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded-md font-medium ${exch.sColor}`}>{exch.status}</span>
-                    </div>
-                    <div className="space-y-2 mb-6 text-sm">
-                      <div className="flex justify-between"><span className="text-gray-500">Вы обучаете:</span><span className="font-semibold text-gray-900 dark:text-white">{exch.teach}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Вы изучаете:</span><span className="font-semibold text-gray-900 dark:text-white">{exch.learn}</span></div>
-                    </div>
-                    <button className="w-full py-2 bg-blue-50 text-primary font-bold rounded-xl hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>Открыть чат
-                    </button>
-                  </div>
-                ))}
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                {stats.activeExchanges > 0 ? (
+                  <p className="text-gray-700 dark:text-gray-200">
+                    Сейчас у вас {stats.activeExchanges} активных обменов. Полный список и детали доступны в разделе обменов.
+                  </p>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Пока нет активных обменов. Создайте первый запрос в каталоге навыков.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -104,17 +114,18 @@ export const ProfilePage: React.FC = () => {
                 <button className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center text-xl hover:bg-secondary shadow-md">+</button>
               </div>
               <div className="space-y-3">
-                {[
-                  { title: 'UI/UX Дизайн', level: 'Эксперт', exch: '24 успешных обмена' },
-                  { title: 'Моушн-графика', level: 'Средний уровень', exch: '8 успешных обменов' },
-                  { title: 'Типографика', level: 'Продвинутый', exch: '15 успешных обменов' }
-                ].map((skill, i) => (
-                  <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-gray-700 rounded-xl shadow-sm">
+                {profileSkills.length === 0 && (
+                  <div className="p-4 bg-white dark:bg-gray-700 rounded-xl shadow-sm text-sm text-gray-500 dark:text-gray-300">
+                    У вас пока нет добавленных навыков.
+                  </div>
+                )}
+                {profileSkills.map((skill) => (
+                  <div key={skill.id} className="flex justify-between items-center p-4 bg-white dark:bg-gray-700 rounded-xl shadow-sm">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-gray-600 flex items-center justify-center text-primary">★</div>
                       <div>
                         <p className="font-bold text-gray-900 dark:text-white">{skill.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{skill.level} • {skill.exch}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{skill.subtitle}</p>
                       </div>
                     </div>
                     <button className="text-gray-400 hover:text-gray-600">✎</button>

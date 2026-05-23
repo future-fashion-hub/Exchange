@@ -10,7 +10,7 @@ export const HomePage: React.FC = () => {
           
           <div className="lg:w-1/2 flex flex-col items-start text-left z-10 space-y-6">
             <span className="bg-pink-100 text-pink-600 dark:bg-pink-900 dark:text-pink-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-              Цифровое ателье
+              Не плати за обучение
             </span>
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">
               Обменивайтесь<br />

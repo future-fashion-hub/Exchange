@@ -4,6 +4,7 @@ import { prepareSkillsToRender } from "../../../shared/lib/prepareSkillsToRender
 import { RootState, useDispatch, useSelector } from '@store';
 import { setOfferUser } from '../../../services/users/users-slice';
 import { getImageUrl, toAbsoluteServerUrl } from "../../../shared/lib/helpers";
+import skillPlaceholder from "../../../shared/assets/images/school-board.png";
 
 type UserCardProps = {
   user: TUser;
@@ -13,6 +14,7 @@ type UserCardProps = {
 export const UserCard = ({
   user,
 }: UserCardProps) => {
+  const currentUser = useSelector((s: RootState) => s.user.user);
   const subCategories = useSelector((s: RootState) => s.categories.subcategories);
   const { skillsCanRender } = prepareSkillsToRender(
     user.need_subcat,
@@ -23,7 +25,8 @@ export const UserCard = ({
   const navigate = useNavigate();
 
   const avatar = getImageUrl(user.photo);
-  const coverImage = user.images?.[0] ? toAbsoluteServerUrl(user.images[0]) : avatar;
+  const fallbackSkillImage = skillPlaceholder;
+  const coverImage = user.images?.[0] ? toAbsoluteServerUrl(user.images[0]) : fallbackSkillImage;
   
   // Use user's primary offer as title, fallback to something else
   const title = user.sub_text || (skillsCanRender[0] as string) || "Обучение и обмен опытом";
@@ -36,6 +39,15 @@ export const UserCard = ({
     navigate(`/skills/${user.id}`);
   };
 
+  const onExchangeClick = () => {
+    if (!currentUser) {
+      navigate('/registration/step1');
+      return;
+    }
+
+    onDetailsClick();
+  };
+
   return (
     <article className="flex flex-col w-full h-full bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 group">
       
@@ -46,7 +58,7 @@ export const UserCard = ({
            alt="Cover"
            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
            onError={(e) => {
-             (e.target as HTMLImageElement).src = avatar;
+             (e.target as HTMLImageElement).src = fallbackSkillImage;
            }}
         />
         <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-900 dark:text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-sm uppercase tracking-wider">
@@ -76,11 +88,11 @@ export const UserCard = ({
         </div>
 
         {/* Content */}
-        <h4 className="font-extrabold text-xl text-gray-900 dark:text-white mb-3 line-clamp-2 hover:text-primary transition-colors cursor-pointer" onClick={onDetailsClick}>
+        <h4 className="font-extrabold text-xl text-gray-900 dark:text-white mb-3 line-clamp-2 min-h-[3.5rem] hover:text-primary transition-colors cursor-pointer" onClick={onDetailsClick}>
           {title}
         </h4>
         
-        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-6 flex-grow">
+        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 h-[4.5rem] overflow-hidden mb-6">
           {user.about || "Свяжитесь со мной для подробностей. Буду рад обсудить возможности сотрудничества и обмена навыками в удобное для нас время."}
         </p>
 
@@ -93,6 +105,7 @@ export const UserCard = ({
             Подробнее
           </button>
           <button 
+            onClick={onExchangeClick}
             className="flex-1 bg-blue-50 text-primary hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-colors text-center uppercase"
           >
             Обменять

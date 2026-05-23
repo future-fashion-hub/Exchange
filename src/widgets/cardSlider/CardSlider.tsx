@@ -33,10 +33,9 @@ export const CardSlider = ({ users }: CardSliderProps) => {
         {!visibleUsers && Loader}
         
         {visibleUsers.map((user) => (
-          <UserCard
-            key={user.id}
-            user={user}
-          />
+          <div key={user.id} className={styles.cardItem}>
+            <UserCard user={user} />
+          </div>
         ))}
       </div>
 

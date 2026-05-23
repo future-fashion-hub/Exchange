@@ -12,6 +12,13 @@
   width: 100%;
   /* gap: 24px; */
   gap: 1.5em;
+  align-items: stretch;
+}
+
+.cardItem {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
 }
 
 button {
