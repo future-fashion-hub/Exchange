@@ -10,10 +10,12 @@ export type ChatMessagePayload = {
 };
 
 export type NotificationPayload = {
+  id: string;
   type: string;
-  senderId: string;
-  text: string;
+  title: string;
+  message: string;
   createdAt: string;
+  readAt: string | null;
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
