@@ -3,20 +3,21 @@ import jwt from "jsonwebtoken";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const prismaMock = {
-  user: {
-    findUnique: vi.fn(),
+const { prismaMock, createNotificationMock } = vi.hoisted(() => ({
+  prismaMock: {
+    user: {
+      findUnique: vi.fn(),
+    },
+    offerExchange: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
   },
-  offerExchange: {
-    findMany: vi.fn(),
-    findFirst: vi.fn(),
-    findUnique: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-  },
-};
-
-const createNotificationMock = vi.fn();
+  createNotificationMock: vi.fn(),
+}));
 
 vi.mock("../prisma", () => ({
   default: prismaMock,

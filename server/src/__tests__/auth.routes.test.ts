@@ -3,14 +3,15 @@ import express from "express";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const prismaMock = {
-  user: {
-    findUnique: vi.fn(),
-    create: vi.fn(),
+const { prismaMock, createNotificationMock } = vi.hoisted(() => ({
+  prismaMock: {
+    user: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+    },
   },
-};
-
-const createNotificationMock = vi.fn();
+  createNotificationMock: vi.fn(),
+}));
 
 vi.mock("../prisma", () => ({
   default: prismaMock,
@@ -106,4 +107,3 @@ describe("auth routes", () => {
     expect(response.status).toBe(401);
   });
 });
-

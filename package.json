@@ -8,8 +8,8 @@
     "build": "node scripts/build.mjs",
     "preview": "node scripts/preview.mjs",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "node scripts/test.mjs",
+    "test:watch": "node scripts/test.mjs --watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",

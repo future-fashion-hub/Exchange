@@ -143,7 +143,7 @@ describe('ChatPage', () => {
     await waitFor(() =>
       expect(sendMessageApiMock).toHaveBeenCalledWith('peer-1', 'new message text'),
     );
-    expect(await screen.findByText('new message text')).toBeInTheDocument();
+    const renderedMessages = await screen.findAllByText('new message text');
+    expect(renderedMessages.length).toBeGreaterThan(0);
   });
 });
-

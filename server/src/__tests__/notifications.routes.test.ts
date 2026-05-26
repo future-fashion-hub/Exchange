@@ -3,12 +3,14 @@ import jwt from "jsonwebtoken";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const prismaMock = {
-  notification: {
-    findMany: vi.fn(),
-    updateMany: vi.fn(),
+const { prismaMock } = vi.hoisted(() => ({
+  prismaMock: {
+    notification: {
+      findMany: vi.fn(),
+      updateMany: vi.fn(),
+    },
   },
-};
+}));
 
 vi.mock("../prisma", () => ({
   default: prismaMock,
@@ -88,4 +90,3 @@ describe("notifications routes", () => {
     );
   });
 });
-

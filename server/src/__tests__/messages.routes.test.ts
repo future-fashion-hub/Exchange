@@ -3,17 +3,23 @@ import jwt from "jsonwebtoken";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const prismaMock = {
-  message: {
-    findMany: vi.fn(),
-    create: vi.fn(),
-  },
-};
+const { prismaMock, emitMock, toMock, getIoMock, createNotificationMock } = vi.hoisted(
+  () => ({
+    prismaMock: {
+      message: {
+        findMany: vi.fn(),
+        create: vi.fn(),
+      },
+    },
+    emitMock: vi.fn(),
+    toMock: vi.fn(() => ({ emit: vi.fn() })),
+    getIoMock: vi.fn(() => ({ to: vi.fn(() => ({ emit: vi.fn() })) })),
+    createNotificationMock: vi.fn(),
+  }),
+);
 
-const emitMock = vi.fn();
-const toMock = vi.fn(() => ({ emit: emitMock }));
-const getIoMock = vi.fn(() => ({ to: toMock }));
-const createNotificationMock = vi.fn();
+toMock.mockImplementation(() => ({ emit: emitMock }));
+getIoMock.mockImplementation(() => ({ to: toMock }));
 
 vi.mock("../prisma", () => ({
   default: prismaMock,
@@ -120,4 +126,3 @@ describe("messages routes", () => {
     );
   });
 });
-
