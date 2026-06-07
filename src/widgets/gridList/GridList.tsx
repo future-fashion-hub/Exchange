@@ -16,6 +16,7 @@ type GridListProps = {
   onLoadMore: () => void;
   showSort?: boolean;
   showPagination?: boolean;
+  isGuest?: boolean;
 };
 
 const GUEST_CATALOG_USERS: TUser[] = [
@@ -134,6 +135,7 @@ export const GridList = ({
   onLoadMore,
   showSort = true,
   showPagination = true,
+  isGuest = false,
 }: GridListProps) => {
 
   const currentUser = useSelector(getCurrentUser);
@@ -141,7 +143,7 @@ export const GridList = ({
 
   const filteredUsers = users
     .filter(u => u.id !== currentUserId)
-  const sourceUsers = !currentUser && filteredUsers.length === 0 ? GUEST_CATALOG_USERS : filteredUsers;
+  const sourceUsers = isGuest && filteredUsers.length === 0 ? GUEST_CATALOG_USERS : filteredUsers;
   const maxItems = typeof(rows) === "number" ? rows * 3 : sourceUsers.length;
   const visibleUsers = sourceUsers.slice(0, maxItems);
 
@@ -186,7 +188,7 @@ export const GridList = ({
                <UserCard user={user} />
              </li>
              {/* Insert Promotional Card after the 5th item simulating the mockup */}
-             {index === 4 && (
+             {isGuest && index === 4 && (
                <li className="w-full h-full flex mt-6 md:mt-0">
                   <div className="w-full h-full min-h-[400px] bg-primary rounded-3xl p-8 flex flex-col items-center justify-center text-center text-white shadow-lg overflow-hidden relative">
                   <div className="mb-6">

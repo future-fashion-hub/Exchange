@@ -1,15 +1,21 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TExchange } from '../../api/types';
+import type { TServerMessage } from '../../api/Api';
 import { ChatPage } from './ChatPage';
 
 const getOffersApiMock = vi.fn();
 const getConversationApiMock = vi.fn();
 const sendMessageApiMock = vi.fn();
-const socketOnMock = vi.fn();
+let chatNewMessageHandler: ((message: TServerMessage) => void) | null = null;
+const socketOnMock = vi.fn((event: string, handler: (message: TServerMessage) => void) => {
+  if (event === 'chat:new_message') {
+    chatNewMessageHandler = handler;
+  }
+});
 const socketOffMock = vi.fn();
 const socketEmitMock = vi.fn();
 const connectSocketMock = vi.fn(() => ({
@@ -29,7 +35,10 @@ vi.mock('../../shared/lib/socketClient', () => ({
 }));
 
 const createToken = (id: string) => {
-  const payload = btoa(JSON.stringify({ id }));
+  const payload = btoa(JSON.stringify({ id }))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
   return `x.${payload}.y`;
 };
 
@@ -62,6 +71,7 @@ const renderChat = (initialPath: string) =>
 describe('ChatPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    chatNewMessageHandler = null;
     localStorage.clear();
     localStorage.setItem('token', createToken('user-1'));
   });
@@ -120,14 +130,15 @@ describe('ChatPage', () => {
       accepted: [makeAcceptedExchange('ex-1', 'peer-1', 'Peer One')],
     });
     getConversationApiMock.mockResolvedValue([]);
-    sendMessageApiMock.mockResolvedValue({
+    const createdMessage = {
       id: 'm-new',
       senderId: 'user-1',
       receiverId: 'peer-1',
       text: 'new message text',
       createdAt: '2026-01-01T11:00:00.000Z',
       readAt: null,
-    });
+    };
+    sendMessageApiMock.mockResolvedValue(createdMessage);
 
     const user = userEvent.setup();
     const { container } = renderChat('/profile/chat?peerId=peer-1');
@@ -143,7 +154,15 @@ describe('ChatPage', () => {
     await waitFor(() =>
       expect(sendMessageApiMock).toHaveBeenCalledWith('peer-1', 'new message text'),
     );
-    const renderedMessages = await screen.findAllByText('new message text');
-    expect(renderedMessages.length).toBeGreaterThan(0);
+    await screen.findAllByTestId('chat-message-bubble');
+
+    act(() => {
+      chatNewMessageHandler?.(createdMessage);
+    });
+
+    const renderedBubbles = await screen.findAllByTestId('chat-message-bubble');
+    expect(renderedBubbles).toHaveLength(1);
+    expect(renderedBubbles[0]).toHaveAttribute('data-owner', 'mine');
+    expect(screen.getByText('Вы')).toBeInTheDocument();
   });
 });

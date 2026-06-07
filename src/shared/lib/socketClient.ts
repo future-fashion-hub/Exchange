@@ -24,7 +24,7 @@ const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 let socketInstance: Socket | null = null;
 
 export const connectSocket = (token: string): Socket => {
-  if (socketInstance && socketInstance.connected) {
+  if (socketInstance) {
     return socketInstance;
   }
 

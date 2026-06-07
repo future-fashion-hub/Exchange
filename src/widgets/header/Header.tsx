@@ -149,7 +149,7 @@ export const Header: FC<{ onOpenRegistration?: () => void }> = () => {
                 onClose={closePopup}
                 align="right"
               >
-                <NotificationWidget />
+                <NotificationWidget onNavigate={closePopup} />
               </Popup>
             </div>
 

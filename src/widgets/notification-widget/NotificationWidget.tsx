@@ -1,4 +1,5 @@
 ﻿import { FC, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "@store";
 import styles from "./NotificationWidget.module.css";
 import { Icon } from "../../shared/ui/icon/Icon";
@@ -16,6 +17,7 @@ import { getCurrentUser } from "../../services/user/user-slice";
 import { NotificationTypes, TNotificationEvent } from "@api/types";
 import { connectSocket } from "../../shared/lib/socketClient";
 import { markAllNotificationsReadApi } from "@api/Api";
+import { getNotificationTargetPath } from "./notificationNavigation";
 
 interface NotificationDisplay {
   id: string;
@@ -23,10 +25,12 @@ interface NotificationDisplay {
   action: string;
   details: string;
   time: string;
+  targetPath: string | null;
 }
 
-export const NotificationWidget: FC = () => {
+export const NotificationWidget: FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const currentUser = useSelector(getCurrentUser);
 
   if (!currentUser) {
@@ -93,6 +97,11 @@ export const NotificationWidget: FC = () => {
     dispatch(deleteAllNotification());
   };
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    onNavigate?.();
+  };
+
   const mapToDisplayFormat = (event: TNotificationEvent): NotificationDisplay => {
     let action = "";
     const details = event.message;
@@ -116,6 +125,7 @@ export const NotificationWidget: FC = () => {
       action,
       details,
       time: formatDate(event.date),
+      targetPath: getNotificationTargetPath(event),
     };
   };
 
@@ -156,6 +166,7 @@ export const NotificationWidget: FC = () => {
                 key={notification.id}
                 notification={mapToDisplayFormat(notification)}
                 isNew={true}
+                onNavigate={handleNavigate}
               />
             ))
           ) : (
@@ -178,6 +189,7 @@ export const NotificationWidget: FC = () => {
                   key={notification.id}
                   notification={mapToDisplayFormat(notification)}
                   isNew={false}
+                  onNavigate={handleNavigate}
                 />
               ))}
             </div>
@@ -191,7 +203,8 @@ export const NotificationWidget: FC = () => {
 const NotificationCard: FC<{
   notification: NotificationDisplay;
   isNew: boolean;
-}> = ({ notification, isNew }) => (
+  onNavigate: (path: string) => void;
+}> = ({ notification, isNew, onNavigate }) => (
   <div className={`${styles.notificationCard} ${isNew ? "" : styles.viewed}`}>
     <div className={styles.iconContainer} aria-hidden="true">
       <Icon name="idea" size={22} strokeWidth={1.6} />
@@ -211,9 +224,13 @@ const NotificationCard: FC<{
       </div>
     </div>
 
-    {isNew && (
+    {isNew && notification.targetPath && (
       <div className={styles.buttonContainer}>
-        <Button size={118} className="bg-blue-600 text-white hover:bg-blue-700">
+        <Button
+          size={118}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => notification.targetPath && onNavigate(notification.targetPath)}
+        >
           Перейти
         </Button>
       </div>

@@ -26,7 +26,10 @@ const parseUserIdFromToken = (token: string | null): string => {
   }
 
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const encodedPayload = token.split('.')[1];
+    const base64 = encodedPayload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedBase64 = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const payload = JSON.parse(atob(paddedBase64));
     return typeof payload.id === 'string' ? payload.id : '';
   } catch {
     return '';
@@ -40,6 +43,17 @@ const formatTime = (value: string) => {
   }
 
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const appendUniqueMessages = (
+  current: TServerMessage[],
+  nextMessages: TServerMessage | TServerMessage[],
+) => {
+  const incoming = Array.isArray(nextMessages) ? nextMessages : [nextMessages];
+  const existingIds = new Set(current.map((item) => item.id));
+  const uniqueIncoming = incoming.filter((item) => !existingIds.has(item.id));
+
+  return uniqueIncoming.length > 0 ? [...current, ...uniqueIncoming] : current;
 };
 
 export const ChatPage: React.FC = () => {
@@ -103,13 +117,13 @@ export const ChatPage: React.FC = () => {
 
     const socket = connectSocket(token);
 
-    socket.on('chat:new_message', (incoming: TServerMessage) => {
+    const handleIncomingMessage = (incoming: TServerMessage) => {
       const isCurrentDialog =
         incoming.senderId === selectedPeerId ||
         (incoming.senderId === currentUserId && incoming.receiverId === selectedPeerId);
 
       if (isCurrentDialog) {
-        setMessages((prev) => [...prev, incoming]);
+        setMessages((prev) => appendUniqueMessages(prev, incoming));
       }
 
       const peerId = incoming.senderId === currentUserId ? incoming.receiverId : incoming.senderId;
@@ -120,10 +134,12 @@ export const ChatPage: React.FC = () => {
             : item,
         ),
       );
-    });
+    };
+
+    socket.on('chat:new_message', handleIncomingMessage);
 
     return () => {
-      socket.off('chat:new_message');
+      socket.off('chat:new_message', handleIncomingMessage);
     };
   }, [token, selectedPeerId, currentUserId]);
 
@@ -138,7 +154,7 @@ export const ChatPage: React.FC = () => {
 
     setIsLoading(true);
     getConversationApi(selectedPeerId)
-      .then((items) => setMessages(items))
+      .then((items) => setMessages(appendUniqueMessages([], items)))
       .catch((error) => {
         console.error('Failed to load conversation:', error);
         setMessages([]);
@@ -155,7 +171,7 @@ export const ChatPage: React.FC = () => {
     const text = message.trim();
     sendMessageApi(selectedPeerId, text)
       .then((created) => {
-        setMessages((prev) => [...prev, created]);
+        setMessages((prev) => appendUniqueMessages(prev, created));
         setChatList((prev) =>
           prev.map((item) =>
             item.id === selectedPeerId
@@ -232,9 +248,17 @@ export const ChatPage: React.FC = () => {
             <div className="space-y-3">
               {!isLoading && messages.map((msg) => {
                 const mine = msg.senderId === currentUserId;
+                const senderLabel = mine ? 'Вы' : selectedPeer?.name || 'Собеседник';
                 return (
                   <div key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[72%] rounded-2xl px-4 py-3 ${mine ? 'bg-primary text-white rounded-br-md' : 'bg-[#e8e9fc] text-slate-700 rounded-bl-md'}`}>
+                    <div
+                      data-testid="chat-message-bubble"
+                      data-owner={mine ? 'mine' : 'peer'}
+                      className={`max-w-[72%] rounded-2xl px-4 py-3 ${mine ? 'bg-primary text-white rounded-br-md' : 'bg-[#e8e9fc] text-slate-700 rounded-bl-md'}`}
+                    >
+                      <div className={`mb-1 text-[11px] font-semibold ${mine ? 'text-blue-100 text-right' : 'text-slate-500'}`}>
+                        {senderLabel}
+                      </div>
                       <p className="leading-relaxed text-[15px]">{msg.text}</p>
                       <div className={`mt-2 text-[11px] ${mine ? 'text-blue-100 text-right' : 'text-slate-400'}`}>
                         {formatTime(msg.createdAt)}

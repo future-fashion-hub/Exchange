@@ -58,6 +58,7 @@ import { getUsersThunk } from "../services/users/actions";
 import { HeaderWithModal } from '../widgets/header/HeaderWithModal';
 import { getMeApi, loginApi, registerApi } from "../api/Api";
 import { setCurrentUser } from "../services/user/user-slice";
+import { canViewCatalog } from "./catalogAccess";
 
 import styles from "./App.module.css";
 
@@ -213,8 +214,32 @@ const CatalogContent: React.FC = () => {
   const users = useSelector((s: RootState) => s.users.users);
   const currentUser = useSelector((s: RootState) => s.user.user);
   const isGuest = !currentUser;
+  const hasCatalogAccess = canViewCatalog(currentUser);
 
   const [selectedPlaces, setSelectedPlaces] = React.useState<string[]>([]);
+
+  if (!hasCatalogAccess) {
+    return (
+      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div className="min-h-[55vh] flex items-center justify-center">
+          <div className="max-w-xl w-full rounded-3xl bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-700 shadow-sm p-10 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-primary dark:bg-gray-700">
+              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c1.657 0 3-1.567 3-3.5S13.657 4 12 4 9 5.567 9 7.5 10.343 11 12 11z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 20a7 7 0 0114 0" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Дождитесь модерации вашего аккаунта
+            </h2>
+            <p className="text-gray-500 dark:text-gray-300 leading-relaxed">
+              Каталог станет доступен после того, как администратор проверит и одобрит ваш профиль.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -240,6 +265,7 @@ const CatalogContent: React.FC = () => {
             onLoadMore={() => {}}
             showSort={!isGuest}
             showPagination={!isGuest}
+            isGuest={isGuest}
           />
         </main>
       </div>
